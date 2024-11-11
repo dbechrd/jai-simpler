@@ -15,3 +15,13 @@ color_brightness :: (v: Vector4, s: float) -> Vector4 {
         v.w
     };
 }
+
+// Convert integer RGB [0, 255] to float RGBA [0.0, 1.0]
+rgb_normalize :: (r: int, g: int, b: int, a: int) -> Vector4 {
+    c: Vector4;
+    c.x = r / 255.0;
+    c.y = g / 255.0;
+    c.z = b / 255.0;
+    c.w = a / 255.0;
+    return c;
+}

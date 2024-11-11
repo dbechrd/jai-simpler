@@ -20,7 +20,7 @@ init_font :: () {
     assert(font_large != null);
 }
 
-draw_prepared_text_shadowed :: (font: *Dynamic_Font, x: s64, y: s64, color := Vector4.{1, 1, 1, 1}, effects: Font_Effects = 0) {
-    draw_prepared_text(font_medium, x - 1, y - 2, Vector4.{ 0, 0, 0, 1 }, effects);
-    draw_prepared_text(font_medium, x, y, Vector4.{ 0.95, 0.95, 0.95, 1 }, effects);
+draw_prepared_text_shadowed :: (font: *Dynamic_Font, x: s64, y: s64, color := Vector4.{0.95, 0.95, 0.95, 1}, effects: Font_Effects = 0) {
+    draw_prepared_text(font, x - 1, y - 2, Vector4.{ 0, 0, 0, 1 }, effects);
+    draw_prepared_text(font, x, y, color, effects);
 }
