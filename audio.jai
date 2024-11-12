@@ -15,9 +15,9 @@ init_audio :: () {
         return;
     }
 
-    set_master_volume(0.5);
     log("sample_rate: %\n", get_audio_sampling_rate());
     log("volume: %\n", Sound.master_volume);
+    // log("mix_levels: %\n", Sound.mix_levels);
 
     default_sound = load_audio_data("default_sound", MISSING_OGG_BYTES);
 }
