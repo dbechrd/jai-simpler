@@ -8,7 +8,7 @@ YELLOW  :: Vector4.{ 1, 1, 0, 1 };
 WHITE   :: Vector4.{ 1, 1, 1, 1 };
 
 color_brightness :: (v: Vector4, s: float) -> Vector4 {
-    return Vector4.{
+    return .{
         v.x * s,
         v.y * s,
         v.z * s,
@@ -24,4 +24,13 @@ rgb_normalize :: (r: int, g: int, b: int, a: int) -> Vector4 {
     c.z = b / 255.0;
     c.w = a / 255.0;
     return c;
+}
+
+fade :: (v: Vector4, alpha: float) -> Vector4 {
+    return .{
+        v.x,
+        v.y,
+        v.z,
+        v.w * alpha
+    };
 }
