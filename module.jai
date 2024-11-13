@@ -14,6 +14,7 @@ window_resizes: [] Window_Resize_Record;
 
 window_size: Size;
 fullscreen: bool;
+window_focused: bool;
 
 quit: bool;
 now: float64;

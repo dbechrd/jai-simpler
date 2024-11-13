@@ -7,6 +7,7 @@ is_key_down :: inline (button: Key_Code) -> bool {
 }
 
 process_input :: () {
+    window_focused = input_application_has_focus;
     x, y := get_mouse_pointer_position();
     mouse_position = .{ xx x, xx y };
 

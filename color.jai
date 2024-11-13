@@ -6,6 +6,7 @@ RED     :: Vector4.{ 1, 0, 0, 1 };
 MAGENTA :: Vector4.{ 1, 0, 1, 1 };
 YELLOW  :: Vector4.{ 1, 1, 0, 1 };
 WHITE   :: Vector4.{ 1, 1, 1, 1 };
+GRAY    :: Vector4.{ .5, .5, .5, 1 };
 
 color_brightness :: (v: Vector4, s: float) -> Vector4 {
     return .{
