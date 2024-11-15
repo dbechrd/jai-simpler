@@ -10,6 +10,7 @@ process_input :: () {
     window_focused = input_application_has_focus;
     x, y := get_mouse_pointer_position();
     mouse_position = .{ xx x, xx y };
+    mouse_position_inverted = .{ xx x, xx (window_size.y - y) };
 
     for events_this_frame {
         if keymap_handle_event(keymap, it) {

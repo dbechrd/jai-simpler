@@ -22,6 +22,7 @@ frame_dt: float64;
 frame_number: int;
 
 mouse_position: Vector2;
+mouse_position_inverted: Vector2;
 scroll_vel: Vector2;
 keymap: Keymap;
 
