@@ -26,12 +26,14 @@ mouse_position_inverted: Vector2;
 scroll_vel: Vector2;
 keymap: Keymap;
 
+debug_key_pressed := false;
 debug_key_callback: ();
 
 DebugKey :: () {
     if debug_key_callback {
         debug_key_callback();
     }
+    debug_key_pressed = true;
 }
 
 init :: (title: string, requested_window_size: Size) {
@@ -77,6 +79,7 @@ begin_frame :: () {
     update_window_events();
 
     // NOTE: This order is important because F11 could generate a window_resize event.
+    debug_key_pressed = false;
     process_input();
 
     window_resizes = get_window_resizes();

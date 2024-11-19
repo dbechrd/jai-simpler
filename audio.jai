@@ -26,12 +26,16 @@ deinit_audio :: () {
     sound_player_shutdown();
 }
 
+set_category_volume :: (category: Sound_Category, volume: float) {
+    Sound.mix_levels[category] = clamp(volume, 0.0, 1.0);
+}
+
 update_audio :: () {
     Sound.update();
 }
 
-play_sound :: (sound_data: *Sound_Data, loop := false) {
-    stream := make_stream(sound_data);
+play_sound :: (sound_data: *Sound_Data, category := Sound_Category.GENERAL_SFX, loop := false) {
+    stream := make_stream(sound_data, category);
     if sound_data.type == .OGG_COMPRESSED {
         // HACK: If an .ogg isn't big enough to finish loading "initial pages", we need to disable the wait.
         stream.internal_flags &= ~.WAITING_FOR_INITIAL_DECODER_PAGES;
