@@ -1,6 +1,7 @@
 #load "audio.jai";
 #load "collision.jai";
 #load "color.jai";
+#load "easing.jai";
 #load "font.jai";
 #load "input.jai";
 #load "logger.jai";
@@ -20,6 +21,7 @@ quit: bool;
 now: float64;
 frame_dt: float64;
 frame_number: int;
+ticks_per_second := 60;
 tick_dt := cast(float64) 1.0 / 60.0;
 tick_accum: float64;
 
@@ -42,8 +44,8 @@ GameMode :: struct {
     name: string;
     init: ();
     deinit: ();
-    update: (frame_dt: float64);
-    tick: (tick_dt: float64);
+    update: ();
+    tick: ();
     draw: ();
 };
 
@@ -129,11 +131,11 @@ simpler_update :: () {
     }
 
     // per-frame updates
-    game_mode.update(frame_dt);
+    game_mode.update();
 
     // fixed physics tick
     if tick_accum > tick_dt {
-        game_mode.tick(tick_dt);
+        game_mode.tick();
         tick_accum -= tick_dt;
     }
 }
