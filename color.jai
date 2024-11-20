@@ -13,7 +13,7 @@ flash_factor :: () -> float {
 }
 
 brightness_factor :: inline () -> float {
-    return flash_factor() + 0.4;
+    return flash_factor() + 0.3;
 }
 
 color_brightness :: inline (v: Vector4, s: float) -> Vector4 {
