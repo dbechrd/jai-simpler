@@ -8,13 +8,29 @@ YELLOW  :: Vector4.{ 1, 1, 0, 1 };
 WHITE   :: Vector4.{ 1, 1, 1, 1 };
 GRAY    :: Vector4.{ .5, .5, .5, 1 };
 
-color_brightness :: (v: Vector4, s: float) -> Vector4 {
+flash_factor :: () -> float {
+    return 0.75 + cos(to_milliseconds(current_time_monotonic()) / 160.0) * 0.25;
+}
+
+brightness_factor :: inline () -> float {
+    return flash_factor() + 0.4;
+}
+
+color_brightness :: inline (v: Vector4, s: float) -> Vector4 {
     return .{
         v.x * s,
         v.y * s,
         v.z * s,
         v.w
     };
+}
+
+color_flash :: inline (v: Vector4) -> Vector4 {
+    return color_brightness(v, brightness_factor());
+}
+
+color_flash :: inline (v: Vector4, enabled: bool) -> Vector4 {
+    return ifx enabled then color_brightness(v, brightness_factor()) else v;
 }
 
 // Convert integer RGB [0, 255] to float RGBA [0.0, 1.0]
@@ -27,7 +43,7 @@ rgb_normalize :: (r: int, g: int, b: int, a: int) -> Vector4 {
     return c;
 }
 
-fade :: (v: Vector4, alpha: float) -> Vector4 {
+fade :: inline (v: Vector4, alpha: float) -> Vector4 {
     return .{
         v.x,
         v.y,
