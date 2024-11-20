@@ -75,6 +75,8 @@ simpler_init :: (title: string, requested_window_size: Size) {
     window, window_size = init_render(title, requested_window_size);
     init_font();
     init_audio();
+
+    tick_accum = tick_dt;  // ensure that we tick immediately on first frame
 }
 
 simpler_deinit :: () {

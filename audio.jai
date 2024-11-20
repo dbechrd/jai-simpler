@@ -23,6 +23,7 @@ init_audio :: () {
 }
 
 deinit_audio :: () {
+    stop_all_sounds_abruptly(0);
     sound_player_shutdown();
 }
 
