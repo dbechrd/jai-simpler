@@ -8,29 +8,41 @@ YELLOW  :: Vector4.{ 1, 1, 0, 1 };
 WHITE   :: Vector4.{ 1, 1, 1, 1 };
 GRAY    :: Vector4.{ .5, .5, .5, 1 };
 
-flash_factor :: () -> float {
-    return 0.75 + cos(to_milliseconds(current_time_monotonic()) / 160.0) * 0.25;
+wave :: (t: float, amplitude := 1.0, frequency := 1.0) -> float {
+    return amplitude * sin(2 * PI * t * frequency);
 }
 
-brightness_factor :: inline () -> float {
-    return flash_factor() + 0.3;
-}
+// Get color with brightness correction, brightness factor goes from -1.0f to 1.0f
+//
+// Credit to Raylib:
+// https://github.com/raysan5/raylib/blob/0d39e7137b28980f05843bd505ef3e74d8772d03/src/rtextures.c#L4980
+//
+color_brightness :: (color: Vector4, factor: float) -> Vector4 {
+    factor = clamp(factor, -1, 1);
+    rgb := Vector3.{ color.x, color.y, color.z };
 
-color_brightness :: inline (v: Vector4, s: float) -> Vector4 {
-    return .{
-        v.x * s,
-        v.y * s,
-        v.z * s,
-        v.w
+    if factor < 0.0 {
+        rgb *= (1 + factor);
+    } else {
+        rgb = rgb + ((.{1, 1, 1} - rgb) * factor);
+    }
+
+    result := Vector4.{
+        clamp(rgb.x, 0, 1),
+        clamp(rgb.y, 0, 1),
+        clamp(rgb.z, 0, 1),
+        color.w
     };
+    return result;
 }
 
-color_flash :: inline (v: Vector4) -> Vector4 {
-    return color_brightness(v, brightness_factor());
+color_flash :: inline (color: Vector4, intensity: float, frequency := 1.0) -> Vector4 {
+    intensity = clamp(intensity, 0, 1);
+    return color_brightness(color, wave(xx seconds_since_init(), intensity, frequency));
 }
 
-color_flash :: inline (v: Vector4, enabled: bool) -> Vector4 {
-    return ifx enabled then color_brightness(v, brightness_factor()) else v;
+color_flash_if :: inline (color: Vector4, enabled: bool, intensity: float, frequency := 1.0) -> Vector4 {
+    return ifx enabled then color_flash(color, intensity) else color;
 }
 
 // Convert integer RGB [0, 255] to float RGBA [0.0, 1.0]

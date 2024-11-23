@@ -26,6 +26,6 @@ init_font :: () {
 }
 
 draw_prepared_text_shadowed :: (font: *Dynamic_Font, x: s64, y: s64, color := Vector4.{0.95, 0.95, 0.95, 1}, effects: Font_Effects = 0) {
-    draw_prepared_text(font, x - 1, y - 2, Vector4.{ 0, 0, 0, 1 }, effects);
+    draw_prepared_text(font, x + 2, y - 1, Vector4.{ 0, 0, 0, 1 }, effects);
     draw_prepared_text(font, x, y, color, effects);
 }
