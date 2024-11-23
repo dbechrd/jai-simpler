@@ -19,21 +19,16 @@ wave :: (t: float, amplitude := 1.0, frequency := 1.0) -> float {
 //
 color_brightness :: (color: Vector4, factor: float) -> Vector4 {
     factor = clamp(factor, -1, 1);
-    rgb := Vector3.{ color.x, color.y, color.z };
+    rgba := color;
 
     if factor < 0.0 {
-        rgb *= (1 + factor);
+        rgba *= (1 + factor);
+        rgba.w = color.w;
     } else {
-        rgb = rgb + ((.{1, 1, 1} - rgb) * factor);
+        rgba = rgba + ((.{1, 1, 1, 1} - rgba) * factor);
     }
 
-    result := Vector4.{
-        clamp(rgb.x, 0, 1),
-        clamp(rgb.y, 0, 1),
-        clamp(rgb.z, 0, 1),
-        color.w
-    };
-    return result;
+    return rgba;
 }
 
 color_flash :: inline (color: Vector4, intensity: float, frequency := 1.0) -> Vector4 {
@@ -42,7 +37,7 @@ color_flash :: inline (color: Vector4, intensity: float, frequency := 1.0) -> Ve
 }
 
 color_flash_if :: inline (color: Vector4, enabled: bool, intensity: float, frequency := 1.0) -> Vector4 {
-    return ifx enabled then color_flash(color, intensity) else color;
+    return ifx enabled then color_flash(color, intensity, frequency) else color;
 }
 
 // Convert integer RGB [0, 255] to float RGBA [0.0, 1.0]
