@@ -8,6 +8,7 @@
 #load "render.jai";
 
 Size :: struct { x: s64; y: s64; };
+Pixel :: struct { x: s64; y: s64; };
 
 window: Window_Type;
 window_info: Saved_Window_Info;
