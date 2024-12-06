@@ -1,10 +1,17 @@
-// TODO: Make this a hash table or something
+// YUCKKKKK Simp takes these as separate args for some reason!?
+font_path: string;
+font_file: string;
+
+// Maybe this should be a hash table or something?
 font_tiny: *Dynamic_Font;
 font_small: *Dynamic_Font;
 font_medium: *Dynamic_Font;
 font_large: *Dynamic_Font;
 
 init_font :: () {
+    assert(xx font_path);
+    assert(xx font_file);
+
     release_font(font_tiny);
     release_font(font_small);
     release_font(font_medium);
@@ -15,10 +22,10 @@ init_font :: () {
     pixel_height_medium := window_size.y / 24;
     pixel_height_large := window_size.y / 16;
 
-    font_tiny = get_font_at_size(".", "KarminaBold.otf", pixel_height_tiny);
-    font_small = get_font_at_size(".", "KarminaBold.otf", pixel_height_small);
-    font_medium = get_font_at_size(".", "KarminaBold.otf", pixel_height_medium);
-    font_large = get_font_at_size(".", "KarminaBold.otf", pixel_height_large);
+    font_tiny = get_font_at_size(font_path, font_file, pixel_height_tiny);
+    font_small = get_font_at_size(font_path, font_file, pixel_height_small);
+    font_medium = get_font_at_size(font_path, font_file, pixel_height_medium);
+    font_large = get_font_at_size(font_path, font_file, pixel_height_large);
     assert(font_tiny != null);
     assert(font_small != null);
     assert(font_medium != null);

@@ -58,7 +58,7 @@ switch_game_mode :: (mode: *GameMode) {
     requested_game_mode = mode;
 }
 
-simpler_init :: (title: string, requested_window_size: Size) {
+simpler_init :: (title: string, requested_window_size: Size, font_base_path: string, font_filename: string) {
     // HACK: For pong swapper thing
     if window return;
 
@@ -73,6 +73,9 @@ simpler_init :: (title: string, requested_window_size: Size) {
         Windows.SetProcessDPIAware();
         Windows.timeBeginPeriod(1);
     }
+
+    font_path = font_base_path;
+    font_file = font_filename;
 
     init_logger();
     window, window_size = init_render(title, requested_window_size);
