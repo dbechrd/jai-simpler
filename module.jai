@@ -67,6 +67,7 @@ simpler_init :: (title: string, requested_window_size: Size, font_base_path: str
 
     path := path_strip_filename(get_path_of_running_executable());
     set_working_directory(path);
+    print("Working Directory: %\n", path);
 
     #if OS == .WINDOWS {
         Windows :: #import "Windows";
