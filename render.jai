@@ -19,6 +19,15 @@ load_texture :: (texture: *Texture, filename: string, srgb := false, build_mipma
     }
 }
 
+clear_render_target :: (color: Vector4) {
+    clear_render_target(
+        color.x,
+        color.y,
+        color.z,
+        color.w
+    );
+}
+
 // NOTE: origin is bottom left, following the Simp convention
 draw_rect :: (x: float, y: float, w: float, h: float, texture: *Texture = null, color := Vector4.{1,1,1,1}) {
     x0, y0, x1, y1 := x, y, x + w, y + h;
