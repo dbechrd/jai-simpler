@@ -31,13 +31,34 @@ clear_render_target :: (color: Vector4) {
 // NOTE: origin is bottom left, following the Simp convention
 draw_rect :: (x: float, y: float, w: float, h: float, texture: *Texture = null, color := Vector4.{1,1,1,1}) {
     x0, y0, x1, y1 := x, y, x + w, y + h;
-
     if texture {
         set_shader_for_images(texture);
     } else {
         set_shader_for_color(true);
     }
     immediate_quad(x0, y0, x1, y1, color);
+}
+
+draw_rect_clamped_to_window :: (x: float, y: float, w: float, h: float, texture: *Texture = null, color := Vector4.{1,1,1,1}) -> clamp_offset: Vector2 {
+    x0, y0, x1, y1 := x, y, x + w, y + h;
+
+    clamp_offset: Vector2;
+
+    if x0 < 0 {
+        clamp_offset.x = -x0;
+    }
+    if y0 < 0 {
+        clamp_offset.y = -y0;
+    }
+    if x1 > xx window_size.x {
+        clamp_offset.x = window_size.x - x1;
+    }
+    if y1 > xx window_size.y {
+        clamp_offset.y = window_size.y - y1;
+    }
+
+    draw_rect(x + clamp_offset.x, y + clamp_offset.y, w, h, texture, color);
+    return clamp_offset;
 }
 
 #scope_file
