@@ -20,15 +20,19 @@ wave :: (t: float, amplitude := 1.0, frequency := 1.0) -> float {
 // Credit to Raylib:
 // https://github.com/raysan5/raylib/blob/0d39e7137b28980f05843bd505ef3e74d8772d03/src/rtextures.c#L4980
 //
-color_brightness :: (color: Vector4, factor: float) -> Vector4 {
-    factor = clamp(factor, -1, 1);
+color_brightness :: (color: Vector4, factor: float, $clamped := true) -> Vector4 {
     rgba := color;
-
-    if factor < 0.0 {
-        rgba *= (1 + factor);
-        rgba.w = color.w;
+    #if clamped {
+        clamped_factor := clamp(factor, -1, 1);
+        if clamped_factor < 0.0 {
+            rgba *= 1.0 + clamped_factor;
+            rgba.w = color.w;
+        } else {
+            rgba = rgba + ((.{1, 1, 1, 1} - rgba) * clamped_factor);
+        }
     } else {
-        rgba = rgba + ((.{1, 1, 1, 1} - rgba) * factor);
+        rgba *= 1.0 + factor;
+        rgba.w = color.w;
     }
 
     return rgba;
@@ -36,7 +40,8 @@ color_brightness :: (color: Vector4, factor: float) -> Vector4 {
 
 color_flash :: inline (color: Vector4, intensity: float, frequency := 1.0) -> Vector4 {
     intensity = clamp(intensity, 0, 1);
-    return color_brightness(color, wave(xx seconds_since_init(), intensity, frequency));
+    factor := wave(xx now, intensity, frequency);
+    return color_brightness(color, factor, clamped = false);
 }
 
 color_flash_if :: inline (color: Vector4, enabled: bool, intensity: float, frequency := 1.0) -> Vector4 {
