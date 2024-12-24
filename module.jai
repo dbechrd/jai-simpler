@@ -87,7 +87,10 @@ simpler_init :: (title: string, requested_window_size: Size, font_base_path: str
 }
 
 simpler_deinit :: () {
-    deinit_audio();
+    if game_mode != null {
+        game_mode.deinit();
+    }
+    // deinit_audio();  // causes freezing, so like.. let's just not do it then -_-
 }
 
 // NOTE: Make sure you register your keymap procedures first!
