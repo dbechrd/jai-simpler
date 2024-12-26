@@ -101,6 +101,64 @@ init_keymap :: (filename: string) {
     }
 }
 
+save_to_file :: (set: *Keymap_Set, filename: string) {
+    builder: String_Builder;
+    print_to_builder(*builder, set);
+    data := builder_to_string(*builder);
+    write_entire_file(filename, data);
+}
+
+print_to_builder :: (builder: *String_Builder, set: *Keymap_Set) {
+    print_to_builder(builder, "[1]  # Version number; do not delete!\n");
+    for set.keymaps {
+        print_to_builder(builder, "\n[%]\n", it.section_name);
+        print_keymap_mappings_to_builder(builder, it);
+    }
+}
+
+save_to_file :: (keymap: *Keymap, filename: string) {
+    builder: String_Builder;
+    print_to_builder(*builder, keymap);
+    data := builder_to_string(*builder);
+    write_entire_file(filename, data);
+}
+
+print_to_builder :: (builder: *String_Builder, keymap: *Keymap) {
+    print_to_builder(builder, "[1]  # Version number; do not delete!\n\n");
+    print_keymap_mappings_to_builder(builder, keymap);
+}
+
+print_keymap_mappings_to_builder :: (builder: *String_Builder, keymap: *Keymap) {
+    for keymap.mappings {
+        key_chord_start := builder_string_length(builder);
+
+        if it.modifier_flags.shift_pressed   print_to_builder(builder, "S-");
+        if it.modifier_flags.ctrl_pressed    print_to_builder(builder, "C-");
+        if it.modifier_flags.alt_pressed     print_to_builder(builder, "A-");
+        // @ToDo: Keymap module doesn't currently handle cmd_meta_pressed, but probably should.
+        if !it.respect_ignore_modifier_keys  print_to_builder(builder, "N-");
+
+        key := map_key_to_string(xx it.utf32,, temp);
+        print_to_builder(builder, "%", key);
+
+        key_chord_length := builder_string_length(builder) - key_chord_start;
+
+        // Vertical alignment
+        LONGEST_MAPPING :: "S-C-A-N-Gamepad_LStickRight";
+        for 0..(LONGEST_MAPPING.count - key_chord_length) {
+            print_to_builder(builder, " ");
+        }
+
+        // @Note: To account for longer mappings than expected, we always print at least one space
+        if it.command_string {
+            print_to_builder(builder, " :%", it.command_string);
+        } else {
+            print_to_builder(builder, " %", keymap.procs[it.proc_index].name);
+        }
+        print_to_builder(builder, "\n");
+    }
+}
+
 begin_frame :: () {
     future := seconds_since_init();
     frame_dt = future - now;
@@ -179,3 +237,4 @@ simpler_game_loop :: () {
 #import "Keymap";
 #import "Math";
 #import "Window_Creation";
+#import "File";
