@@ -90,7 +90,7 @@ simpler_deinit :: () {
     if game_mode != null {
         game_mode.deinit();
     }
-    // deinit_audio();  // causes freezing, so like.. let's just not do it then -_-
+    deinit_audio();
 }
 
 // NOTE: Make sure you register your keymap procedures first!
