@@ -19,11 +19,11 @@ init_font :: () {
     release_font(font_medium);
     release_font(font_large);
 
-    pixel_height_tiny := window_size.y / 64;
-    pixel_height_smaller := window_size.y / 48;
-    pixel_height_small := window_size.y / 36;
-    pixel_height_medium := window_size.y / 24;
-    pixel_height_large := window_size.y / 16;
+    pixel_height_tiny := window_size.y / 80;
+    pixel_height_smaller := window_size.y / 54;
+    pixel_height_small := window_size.y / 42;
+    pixel_height_medium := window_size.y / 36;
+    pixel_height_large := window_size.y / 24;
 
     font_tiny = get_font_at_size(font_path, font_file, pixel_height_tiny);
     font_smaller = get_font_at_size(font_path, font_file, pixel_height_smaller);
@@ -37,7 +37,17 @@ init_font :: () {
     assert(font_large != null);
 }
 
-draw_prepared_text_shadowed :: (font: *Dynamic_Font, x: s64, y: s64, color := Vector4.{0.95, 0.95, 0.95, 1}, effects: Font_Effects = 0) {
-    draw_prepared_text(font, x + 2, y - 1, Vector4.{ 0, 0, 0, 1 }, effects);
+draw_prepared_text_shadowed :: (font: *Dynamic_Font, x: s64, y: s64, color := Vector4.{0.95, 0.95, 0.95, 1}, shadow_color := Vector4.{0, 0, 0, -1}, effects: Font_Effects = 0) {
+    shadow := shadow_color;
+    if shadow.w < 0 {
+        shadow = BLACK;
+        if color.x + color.y + color.z < 0.5 {
+            shadow = WHITE;
+        }
+    }
+    if shadow.w {
+        shadow.w = color.w;
+        draw_prepared_text(font, x + 1, y - 1, shadow, effects);
+    }
     draw_prepared_text(font, x, y, color, effects);
 }

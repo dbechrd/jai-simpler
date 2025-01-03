@@ -1,16 +1,19 @@
-WHITE       :: Vector4.{ 1, 1, 1, 1 };
-LIGHT_GRAY  :: Vector4.{ .75, .75, .75, 1 };
-GRAY        :: Vector4.{ .5, .5, .5, 1 };
-DARK_GRAY   :: Vector4.{ .25, .25, .25, 1 };
-BLACK       :: Vector4.{ 0, 0, 0, 1 };
-BLUE        :: Vector4.{ 0, 0, 1, 1 };
-GREEN       :: Vector4.{ 0, 1, 0, 1 };
-CYAN        :: Vector4.{ 0, 1, 1, 1 };
-RED         :: Vector4.{ 1, 0, 0, 1 };
-MAGENTA     :: Vector4.{ 1, 0, 1, 1 };
-YELLOW      :: Vector4.{ 1, 1, 0, 1 };
+TRANSPARENT     :: Vector4.{};
+WHITE           :: Vector4.{ 1, 1, 1, 1 };
+LIGHT_GRAY      :: Vector4.{ .75, .75, .75, 1 };
+SEMI_LIGHT_GRAY :: Vector4.{ .66, .66, .66, 1 };
+GRAY            :: Vector4.{ .5, .5, .5, 1 };
+SEMI_DARK_GRAY  :: Vector4.{ .33, .33, .33, 1 };
+DARK_GRAY       :: Vector4.{ .25, .25, .25, 1 };
+BLACK           :: Vector4.{ 0, 0, 0, 1 };
+BLUE            :: Vector4.{ 0, 0, 1, 1 };
+GREEN           :: Vector4.{ 0, 1, 0, 1 };
+CYAN            :: Vector4.{ 0, 1, 1, 1 };
+RED             :: Vector4.{ 1, 0, 0, 1 };
+MAGENTA         :: Vector4.{ 1, 0, 1, 1 };
+YELLOW          :: Vector4.{ 1, 1, 0, 1 };
 
-WHITE_HOVER :: #run WHITE * 1.4; // for highlighting textures on mouse hover
+WHITE_HOVER :: #run WHITE * 1.25; // for highlighting textures on mouse hover
 
 wave :: (t: float, amplitude := 1.0, frequency := 1.0) -> float {
     return amplitude * sin(2 * PI * t * frequency);
