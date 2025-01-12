@@ -1,5 +1,5 @@
 is_key_down_start :: inline (button: Key_Code) -> bool {
-    return cast(bool) (input_button_states[button] & (.DOWN | .START));
+    return cast(bool) (input_button_states[button] & .START);
 }
 
 is_key_down :: inline (button: Key_Code) -> bool {

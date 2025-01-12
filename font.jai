@@ -48,6 +48,7 @@ draw_prepared_text_shadowed :: (font: *Dynamic_Font, x: s64, y: s64, color := Ve
     if shadow.w {
         shadow.w = color.w;
         draw_prepared_text(font, x + 1, y - 1, shadow, effects);
+        // draw_prepared_text(font, x + 2, y - 2, shadow, effects);  // NOTE: To get higher offset, draw both, looks prettier?
     }
     draw_prepared_text(font, x, y, color, effects);
 }

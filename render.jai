@@ -9,10 +9,6 @@ init_render :: (title: string, window_size: Size) -> Window_Type, Size {
     return window, .{ width, height };
 }
 
-window_center :: () -> Vector2 {
-    return .{ xx (window_size.x / 2), xx (window_size.y / 2) };
-}
-
 load_texture :: (texture: *Texture, filename: string, srgb := false, build_mipmaps := false) {
     if !texture_load_from_file(texture, filename, srgb, build_mipmaps) {
         log_error("Failed to load texture %\n", filename);

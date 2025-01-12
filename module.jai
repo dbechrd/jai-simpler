@@ -15,6 +15,7 @@ window_info: Saved_Window_Info;
 window_resizes: [] Window_Resize_Record;
 
 window_size: Size;
+window_center: Vector2;
 fullscreen: bool;
 window_focused: bool;
 
@@ -22,8 +23,8 @@ quit: bool;
 now: float64;
 frame_dt: float64;
 frame_number: int;
-ticks_per_second := 60;
-tick_dt := cast(float64) 1.0 / 60.0;
+ticks_per_second := 60;  // you can change this, but you must do it in init()!
+tick_dt: float64;
 tick_accum: float64;
 
 mouse_position: Vector2;
@@ -80,10 +81,9 @@ simpler_init :: (title: string, requested_window_size: Size, font_base_path: str
 
     init_logger();
     window, window_size = init_render(title, requested_window_size);
+    window_center = .{ xx (window_size.x / 2), xx (window_size.y / 2) };
     init_font();
     init_audio();
-
-    tick_accum = tick_dt;  // ensure that we tick immediately on first frame
 }
 
 simpler_deinit :: () {
@@ -114,6 +114,8 @@ begin_frame :: () {
         game_mode = requested_game_mode;
         log("Entering mode '%'.\n", game_mode.name);
         game_mode.init();
+        tick_dt = 1.0 / ticks_per_second;
+        tick_accum = tick_dt;  // ensure that we tick immediately on first frame
     }
 }
 
@@ -129,6 +131,7 @@ simpler_update :: () {
         update_window(it.window);
         if it.window == window && (it.width != window_size.x || it.height != window_size.y) {
             window_size = .{ it.width, it.height };
+            window_center = .{ xx (window_size.x / 2), xx (window_size.y / 2) };
             init_font();
         }
     }
