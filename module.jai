@@ -21,11 +21,22 @@ window_focused: bool;
 
 quit: bool;
 now: float64;
-frame_dt: float64;
+vsync: bool = true;
 frame_number: int;
+frame_dt: float64;
 ticks_per_second := 60;  // you can change this, but you must do it in init()!
 tick_dt: float64;
 tick_accum: float64;
+
+Timing :: enum {
+    Update;
+    Tick;
+    Draw;
+    Audio;
+    Count;
+}
+timings: [Timing.Count] float64;
+timings_buf: [Timing.Count] float64;
 
 mouse_position: Vector2;
 mouse_position_inverted: Vector2;
@@ -142,28 +153,42 @@ simpler_update :: () {
     }
 
     // per-frame updates
+    t_update := seconds_since_init();
     game_mode.update();
+    timings_buf[Timing.Update] = seconds_since_init() - t_update;
 
     // fixed physics tick
+    t_tick_sum: float64;
+    t_ticks := floor(tick_accum / tick_dt);
     if tick_accum > tick_dt {
+        t_tick := seconds_since_init();
         game_mode.tick();
+        t_tick_sum += seconds_since_init() - t_tick;
         tick_accum -= tick_dt;
     }
+    timings_buf[Timing.Tick] = ifx t_ticks then t_tick_sum / t_ticks else 0;
 }
 
 simpler_draw :: () {
+    t_draw := seconds_since_init();
     game_mode.draw();
+    timings_buf[Timing.Draw] = seconds_since_init() - t_draw;
 }
 
 end_frame :: (sleep_ms: s32 = 0) {
+    t_audio := seconds_since_init();
     update_audio();
-    swap_buffers(window);
+    timings_buf[Timing.Audio] = seconds_since_init() - t_audio;
+
+    swap_buffers(window, vsync);
 
     memory_visualizer_per_frame_update();
     reset_temporary_storage();
     if sleep_ms > 0 {
         sleep_milliseconds(sleep_ms);
     }
+
+    timings = timings_buf;
 }
 
 simpler_game_loop :: () {

@@ -19,7 +19,7 @@ init_font :: () {
     release_font(font_medium);
     release_font(font_large);
 
-    pixel_height_tiny := window_size.y / 80;
+    pixel_height_tiny := window_size.y / 72;
     pixel_height_smaller := window_size.y / 54;
     pixel_height_small := window_size.y / 42;
     pixel_height_medium := window_size.y / 36;
