@@ -1,3 +1,5 @@
+#module_parameters ()(WIN_CONSOLE := false);
+
 #load "audio.jai";
 #load "collision.jai";
 #load "color.jai";
@@ -19,6 +21,13 @@ window_center: Vector2;
 fullscreen: bool;
 window_focused: bool;
 
+#run {
+    #if OS == .WINDOWS && !WIN_CONSOLE {
+        WR :: #import "Windows_Resources";
+        WR.disable_runtime_console();
+    }
+}
+
 quit: bool;
 now: float64;
 vsync: bool = true;
@@ -27,6 +36,7 @@ frame_dt: float64;
 ticks_per_second := 60;  // you can change this, but you must do it in init()!
 tick_dt: float64;
 tick_accum: float64;
+tick_number: int;
 
 Timing :: enum {
     Update;
@@ -79,7 +89,7 @@ simpler_init :: (title: string, requested_window_size: Size, font_base_path: str
 
     path := path_strip_filename(get_path_of_running_executable());
     set_working_directory(path);
-    print("Working Directory: %\n", path);
+    log("Working Directory: %\n", path);
 
     #if OS == .WINDOWS {
         Windows :: #import "Windows";
@@ -102,6 +112,7 @@ simpler_deinit :: () {
         game_mode.deinit();
     }
     deinit_audio();
+    deinit_logger();
 }
 
 // NOTE: Make sure you register your keymap procedures first!
@@ -147,10 +158,9 @@ simpler_update :: () {
         }
     }
 
-    // ignore big spikes when debugging
-    if frame_dt < tick_dt * 2 {
-        tick_accum += frame_dt;
-    }
+    tick_accum += frame_dt;
+    // re-sync tick accumulator when there are big frame time spikes
+    tick_accum = clamp(tick_accum, 0, tick_dt * 3);
 
     // per-frame updates
     t_update := seconds_since_init();
@@ -158,15 +168,13 @@ simpler_update :: () {
     timings_buf[Timing.Update] = seconds_since_init() - t_update;
 
     // fixed physics tick
-    t_tick_sum: float64;
-    t_ticks := floor(tick_accum / tick_dt);
-    if tick_accum > tick_dt {
-        t_tick := seconds_since_init();
+    t_tick := seconds_since_init();
+    while tick_accum >= tick_dt {
         game_mode.tick();
-        t_tick_sum += seconds_since_init() - t_tick;
         tick_accum -= tick_dt;
+        tick_number += 1;
     }
-    timings_buf[Timing.Tick] = ifx t_ticks then t_tick_sum / t_ticks else 0;
+    timings_buf[Timing.Tick] = seconds_since_init() - t_tick;
 }
 
 simpler_draw :: () {
@@ -182,11 +190,11 @@ end_frame :: (sleep_ms: s32 = 0) {
 
     swap_buffers(window, vsync);
 
-    memory_visualizer_per_frame_update();
+    // memory_visualizer_per_frame_update();
     reset_temporary_storage();
-    if sleep_ms > 0 {
-        sleep_milliseconds(sleep_ms);
-    }
+    //if sleep_ms > 0 {
+    //    sleep_milliseconds(sleep_ms);
+    //}
 
     timings = timings_buf;
 }

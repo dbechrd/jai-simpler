@@ -1,4 +1,15 @@
+log_file_path := "log.txt";
+
 init_logger :: () {
+    context.log_level = .VERY_VERBOSE;
+    context.print_style.default_format_struct.use_long_form_if_more_than_this_many_members = -1;
+    context.print_style.default_format_struct.use_newlines_if_long_form = true;
+    context.print_style.default_format_array.stop_printing_after_this_many_elements = 1000;
+
+    file, success := file_open(log_file_path, for_writing=true, keep_existing_content=false);
+    if !success return;
+    log_file = file;
+
     context.logger = (message: string, data: *void, info: Log_Info) {
         if !message then return;
 
@@ -9,24 +20,25 @@ init_logger :: () {
             return;
         }
 
-        // Unify output to stdout so that everything shows up in VSCode's Output window.
-        to_standard_error := false; //(info.common_flags & .ERROR) != 0;
+        file_write(*log_file, message);
 
-        if message[message.count-1] != #char "\n" {
-            write_strings(message, "\n", to_standard_error = to_standard_error);
-        } else {
-            write_string(message, to_standard_error = to_standard_error);
-        }
+        // kernel32 :: #system_library "kernel32";
+        // BOOL     :: enum s32 { FALSE :: 0; TRUE :: 1; }
+        // HANDLE :: *void;
+        // FlushFileBuffers :: (hFile: HANDLE) -> BOOL #foreign kernel32;
+        // FlushFileBuffers(log_file.handle);
     };
-    context.log_level = .VERY_VERBOSE;
-    context.print_style.default_format_struct.use_long_form_if_more_than_this_many_members = -1;
-    context.print_style.default_format_struct.use_newlines_if_long_form = true;
-    context.print_style.default_format_array.stop_printing_after_this_many_elements = 1000;
 
     log_preamble();
 }
 
+deinit_logger :: () {
+    file_close(*log_file);
+}
+
 #scope_file
+
+log_file: File;
 
 log_preamble :: () {
     log_cpu_info();
