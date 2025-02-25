@@ -1,18 +1,42 @@
-init_render :: (title: string, window_size: Size) -> Window_Type, Size {
-    window := create_window(window_size.x, window_size.y, title);
-    set_render_target(window);
+Size :: struct { x: s64; y: s64; };
+Pixel :: struct { x: s64; y: s64; };
 
-    width, height := get_render_dimensions(window);
+window: Window_Type;
+window_size: Size;
+window_center: Vector2;
 
-    log("\n--- Render Info ---\n");
-    log("window_size: % x %\n", width, height);
-    return window, .{ width, height };
+window_info: Saved_Window_Info;
+window_resizes: [] Window_Resize_Record;
+
+fullscreen: bool;
+window_focused: bool;
+
+#if ASSET_WATCHER {
+    texture_by_filepath: Table(string, *Texture);
 }
 
-load_texture :: (texture: *Texture, filename: string, srgb := false, build_mipmaps := false) {
-    if !texture_load_from_file(texture, filename, srgb, build_mipmaps) {
-        log_error("Failed to load texture %\n", filename);
+init_render :: (title: string, requested_window_size: Size) {
+    #if ASSET_WATCHER {
+        assert(!texture_by_filepath.allocated);
+        init(*texture_by_filepath, 64);
     }
+
+    window = create_window(requested_window_size.x, requested_window_size.y, title);
+    set_render_target(window, ifx LEFT_HANDED then .LEFT_HANDED else .RIGHT_HANDED);
+
+    window_size.x, window_size.y = get_render_dimensions(window);
+    window_center = .{ xx (window_size.x / 2), xx (window_size.y / 2) };
+
+    log("\n--- Render Info ---\n");
+    log("window_size: % x %\n", window_size.x, window_size.y);
+}
+
+load_texture :: (texture: *Texture, filepath: string, srgb := false, build_mipmaps := false) {
+    if !texture_load_from_file(texture, filepath, srgb, build_mipmaps) {
+        log_error("Failed to load texture %\n", filepath);
+        return;
+    }
+    #if ASSET_WATCHER table_add(*texture_by_filepath, filepath, texture);
 }
 
 clear_render_target :: (color: Vector4) {
@@ -60,3 +84,4 @@ draw_rect_clamped_to_window :: (x: float, y: float, w: float, h: float, texture:
 #scope_file
 
 #import "Simp";
+#import "Hash_Table";

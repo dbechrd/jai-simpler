@@ -8,7 +8,7 @@ init_audio :: () {
     devices := get_devices();
     log("devices: %\n", devices);
 
-    success := sound_player_init(.{ audible_when_window_is_not_in_focus = false });
+    success := sound_player_init(.{ audible_when_window_is_not_in_focus = BACKGROUND_AUDIO });
     assert(success);
     if !success {
         log_error("failed to initialize sound player\n");

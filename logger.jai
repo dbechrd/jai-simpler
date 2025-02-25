@@ -1,5 +1,24 @@
 log_file_path := "log.txt";
 
+simpler_logger :: (message: string, data: *void, info: Log_Info) {
+    if !message then return;
+
+    if info.common_flags & .VERY_VERBOSE_ONLY && context.log_level < .VERY_VERBOSE {
+        return;
+    }
+    if info.common_flags & .VERBOSE_ONLY && context.log_level < .VERBOSE {
+        return;
+    }
+
+    file_write(*log_file, message);
+
+    // kernel32 :: #system_library "kernel32";
+    // BOOL     :: enum s32 { FALSE :: 0; TRUE :: 1; }
+    // HANDLE :: *void;
+    // FlushFileBuffers :: (hFile: HANDLE) -> BOOL #foreign kernel32;
+    // FlushFileBuffers(log_file.handle);
+};
+
 init_logger :: () {
     context.log_level = .VERY_VERBOSE;
     context.print_style.default_format_struct.use_long_form_if_more_than_this_many_members = -1;
@@ -10,25 +29,7 @@ init_logger :: () {
     if !success return;
     log_file = file;
 
-    context.logger = (message: string, data: *void, info: Log_Info) {
-        if !message then return;
-
-        if info.common_flags & .VERY_VERBOSE_ONLY && context.log_level < .VERY_VERBOSE {
-            return;
-        }
-        if info.common_flags & .VERBOSE_ONLY && context.log_level < .VERBOSE {
-            return;
-        }
-
-        file_write(*log_file, message);
-
-        // kernel32 :: #system_library "kernel32";
-        // BOOL     :: enum s32 { FALSE :: 0; TRUE :: 1; }
-        // HANDLE :: *void;
-        // FlushFileBuffers :: (hFile: HANDLE) -> BOOL #foreign kernel32;
-        // FlushFileBuffers(log_file.handle);
-    };
-
+    context.logger = simpler_logger;
     log_preamble();
 }
 

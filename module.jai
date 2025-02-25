@@ -1,4 +1,9 @@
-#module_parameters ()(WIN_CONSOLE := false);
+#module_parameters ()(
+    LEFT_HANDED := true,        // Simp handedness
+    WIN_CONSOLE := false,       // hide console on windows
+    BACKGROUND_AUDIO := false,  // play audio when window minimized (it platform supports it)
+    ASSET_WATCHER := false      // hot reload texture
+);
 
 #load "audio.jai";
 #load "collision.jai";
@@ -8,18 +13,9 @@
 #load "input.jai";
 #load "logger.jai";
 #load "render.jai";
-
-Size :: struct { x: s64; y: s64; };
-Pixel :: struct { x: s64; y: s64; };
-
-window: Window_Type;
-window_info: Saved_Window_Info;
-window_resizes: [] Window_Resize_Record;
-
-window_size: Size;
-window_center: Vector2;
-fullscreen: bool;
-window_focused: bool;
+#if ASSET_WATCHER {
+    #load "watcher.jai";
+}
 
 #run {
     #if OS == .WINDOWS && !WIN_CONSOLE {
@@ -43,6 +39,9 @@ Timing :: enum {
     Tick;
     Draw;
     Audio;
+    #if ASSET_WATCHER {
+        Asset_Watcher;
+    }
     Count;
 }
 timings: [Timing.Count] float64;
@@ -72,7 +71,6 @@ GameMode :: struct {
     draw: ();
 };
 
-game_modes: [..] GameMode;
 game_mode: *GameMode;
 requested_game_mode: *GameMode;
 
@@ -80,7 +78,7 @@ switch_game_mode :: (mode: *GameMode) {
     requested_game_mode = mode;
 }
 
-simpler_init :: (title: string, requested_window_size: Size, font_base_path: string, font_filename: string) {
+simpler_init :: (title: string, requested_window_size: Size) {
     // HACK: For pong swapper thing
     if window return;
 
@@ -97,13 +95,9 @@ simpler_init :: (title: string, requested_window_size: Size, font_base_path: str
         Windows.timeBeginPeriod(1);
     }
 
-    font_path = font_base_path;
-    font_file = font_filename;
-
     init_logger();
-    window, window_size = init_render(title, requested_window_size);
-    window_center = .{ xx (window_size.x / 2), xx (window_size.y / 2) };
-    init_font();
+    init_render(title, requested_window_size);
+    init_fonts();
     init_audio();
 }
 
@@ -112,6 +106,11 @@ simpler_deinit :: () {
         game_mode.deinit();
     }
     deinit_audio();
+    deinit_fonts();
+    #if ASSET_WATCHER {
+        asset_watcher_stop();
+        deinit(*texture_by_filepath);
+    }
     deinit_logger();
 }
 
@@ -138,6 +137,8 @@ begin_frame :: () {
         game_mode.init();
         tick_dt = 1.0 / ticks_per_second;
         tick_accum = tick_dt;  // ensure that we tick immediately on first frame
+
+        #if ASSET_WATCHER asset_watcher_start();
     }
 }
 
@@ -154,7 +155,6 @@ simpler_update :: () {
         if it.window == window && (it.width != window_size.x || it.height != window_size.y) {
             window_size = .{ it.width, it.height };
             window_center = .{ xx (window_size.x / 2), xx (window_size.y / 2) };
-            init_font();
         }
     }
 
@@ -188,10 +188,16 @@ end_frame :: (sleep_ms: s32 = 0) {
     update_audio();
     timings_buf[Timing.Audio] = seconds_since_init() - t_audio;
 
+    #if ASSET_WATCHER {
+        t_asset_watcher := seconds_since_init();
+        asset_watcher_update();
+        timings_buf[Timing.Asset_Watcher] = seconds_since_init() - t_asset_watcher;
+    }
+
     swap_buffers(window, vsync);
 
-    // memory_visualizer_per_frame_update();
     reset_temporary_storage();
+    memory_visualizer_per_frame_update();
     //if sleep_ms > 0 {
     //    sleep_milliseconds(sleep_ms);
     //}
@@ -216,3 +222,4 @@ simpler_game_loop :: () {
 #import "Math";
 #import "Window_Creation";
 #import "File";
+#import "File_Watcher";
