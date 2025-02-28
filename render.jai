@@ -48,6 +48,10 @@ clear_render_target :: (color: Vector4) {
     );
 }
 
+draw_rect :: inline (x: float, y: float, w: float, h: float, color := Vector4.{1,1,1,1}) {
+    draw_rect(x, y, w, h, null, color);
+}
+
 // NOTE: origin is bottom left, following the Simp convention
 draw_rect :: (x: float, y: float, w: float, h: float, texture: *Texture = null, color := Vector4.{1,1,1,1}) {
     x0, y0, x1, y1 := x, y, x + w, y + h;
@@ -57,6 +61,10 @@ draw_rect :: (x: float, y: float, w: float, h: float, texture: *Texture = null, 
         set_shader_for_color(true);
     }
     immediate_quad(x0, y0, x1, y1, color);
+}
+
+draw_rect_clamped_to_window :: inline (x: float, y: float, w: float, h: float, color := Vector4.{1,1,1,1}) -> clamp_offset: Vector2 {
+    return draw_rect_clamped_to_window(x, y, w, h, null, color);
 }
 
 draw_rect_clamped_to_window :: (x: float, y: float, w: float, h: float, texture: *Texture = null, color := Vector4.{1,1,1,1}) -> clamp_offset: Vector2 {

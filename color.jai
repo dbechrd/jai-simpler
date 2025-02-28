@@ -164,6 +164,7 @@ WhiteSmoke           :: #run rgb_normalize(245, 245, 245, 255);
 Yellow               :: #run rgb_normalize(255, 255,   0, 255);
 YellowGreen          :: #run rgb_normalize(154, 205,  50, 255);
 
+// by default wave is -1 to +1
 wave :: (t: float, amplitude := 1.0, frequency := 1.0) -> float {
     return amplitude * sin(2 * PI * t * frequency);
 }

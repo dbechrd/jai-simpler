@@ -8,12 +8,15 @@ Font :: struct {
 
 fonts: [..] Font;
 
-register_font :: (path: string, file: string, pixel_height: int) -> *Font {
+register_font :: (path: string, file: string, pixel_height: int, kern := false) -> *Font {
     font := array_add(*fonts);
     font.path = path;
     font.file = file;
     font.pixel_height = pixel_height;
     font.font = get_font_at_size(path, file, pixel_height);
+    if kern {
+        // prepare_for_kerning(font.font);  // hmmm...
+    }
     return font;
 }
 

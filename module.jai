@@ -1,6 +1,7 @@
 #module_parameters ()(
-    LEFT_HANDED := true,        // Simp handedness
+    MEMORY_DEBUGGER := false,
     WIN_CONSOLE := false,       // hide console on windows
+    LEFT_HANDED := true,        // Simp handedness
     BACKGROUND_AUDIO := false,  // play audio when window minimized (it platform supports it)
     ASSET_WATCHER := false      // hot reload texture
 );
@@ -24,19 +25,28 @@
     }
 }
 
-quit: bool;
+quit: bool;  // you can set this manually
+
+// Internal state, but not hidden because you might want to log/display them.
+// Use set_tps() to set the tick rate.
 now: float64;
 vsync: bool = true;
 frame_number: int;
 frame_dt: float64;
-ticks_per_second := 60;  // you can change this, but you must do it in init()!
+ticks_per_second := 60;
 tick_dt: float64;
 tick_accum: float64;
 tick_number: int;
 
+set_tps :: (tps: int) {
+    assert(tps >= 0);
+    ticks_per_second = tps;
+    tick_dt = ifx ticks_per_second then 1.0 / ticks_per_second else 0.0;
+}
+
 Timing :: enum {
-    Update;
     Tick;
+    Update;
     Draw;
     Audio;
     #if ASSET_WATCHER {
@@ -66,8 +76,8 @@ GameMode :: struct {
     name: string;
     init: ();
     deinit: ();
-    update: ();
     tick: ();
+    update: ();
     draw: ();
 };
 
@@ -110,6 +120,9 @@ simpler_deinit :: () {
     #if ASSET_WATCHER {
         asset_watcher_stop();
         deinit(*texture_by_filepath);
+    }
+    #if MEMORY_DEBUGGER {
+        report_memory_leaks();
     }
     deinit_logger();
 }
@@ -158,23 +171,25 @@ simpler_update :: () {
         }
     }
 
-    tick_accum += frame_dt;
-    // re-sync tick accumulator when there are big frame time spikes
-    tick_accum = clamp(tick_accum, 0, tick_dt * 3);
-
-    // per-frame updates
-    t_update := seconds_since_init();
-    game_mode.update();
-    timings_buf[Timing.Update] = seconds_since_init() - t_update;
+    if ticks_per_second {
+        tick_accum += frame_dt;
+        // re-sync tick accumulator when there are big frame time spikes
+        tick_accum = clamp(tick_accum, 0, tick_dt * 3);
+    }
 
     // fixed physics tick
     t_tick := seconds_since_init();
-    while tick_accum >= tick_dt {
+    while ticks_per_second && tick_accum >= tick_dt {
         game_mode.tick();
         tick_accum -= tick_dt;
         tick_number += 1;
     }
     timings_buf[Timing.Tick] = seconds_since_init() - t_tick;
+
+    // per-frame updates
+    t_update := seconds_since_init();
+    game_mode.update();
+    timings_buf[Timing.Update] = seconds_since_init() - t_update;
 }
 
 simpler_draw :: () {

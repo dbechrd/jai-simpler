@@ -1,6 +1,8 @@
 log_file_path := "log.txt";
 
 simpler_logger :: (message: string, data: *void, info: Log_Info) {
+    assert(log_file.handle != null);
+
     if !message then return;
 
     if info.common_flags & .VERY_VERBOSE_ONLY && context.log_level < .VERY_VERBOSE {
@@ -35,6 +37,7 @@ init_logger :: () {
 
 deinit_logger :: () {
     file_close(*log_file);
+    log_file.handle = null;
 }
 
 #scope_file
