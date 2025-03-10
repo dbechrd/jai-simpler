@@ -13,8 +13,12 @@ register_key_proc :: (keymap: *Keymap, ident: Code) #expand {
 process_input :: () {
     window_focused = input_application_has_focus;
     x, y := get_mouse_pointer_position();
+    prev_mouse := mouse_position;
+    prev_mouse_inv := mouse_position_inverted;
     mouse_position = .{ xx x, xx y };
     mouse_position_inverted = .{ xx x, xx (window_size.y - y) };
+    mouse_delta = mouse_position - prev_mouse;
+    mouse_delta_inverted = mouse_delta_inverted - prev_mouse_inv;
     scroll_vel = .{};
 
     for events_this_frame {

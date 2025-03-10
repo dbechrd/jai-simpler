@@ -12,7 +12,19 @@ simpler_logger :: (message: string, data: *void, info: Log_Info) {
         return;
     }
 
-    file_write(*log_file, message);
+    builder: String_Builder;
+    if info.common_flags & .ERROR {
+        append(*builder, "[Error] ");
+    } else if info.common_flags & .WARNING {
+        append(*builder, "[Warning] ");
+    }
+    append(*builder, message);
+    if message[message.count-1] != #char "\n" {
+        append(*builder, "\n");
+    }
+
+    output := builder_to_string(*builder);
+    file_write(*log_file, output);
 
     // kernel32 :: #system_library "kernel32";
     // BOOL     :: enum s32 { FALSE :: 0; TRUE :: 1; }

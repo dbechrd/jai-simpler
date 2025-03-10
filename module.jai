@@ -29,14 +29,15 @@ quit: bool;  // you can set this manually
 
 // Internal state, but not hidden because you might want to log/display them.
 // Use set_tps() to set the tick rate.
-now: float64;
 vsync: bool = true;
+now: float64;
 frame_number: int;
 frame_dt: float64;
 ticks_per_second := 60;
+tick_now: float64;
+tick_number: int;
 tick_dt: float64;
 tick_accum: float64;
-tick_number: int;
 
 set_tps :: (tps: int) {
     assert(tps >= 0);
@@ -52,13 +53,21 @@ Timing :: enum {
     #if ASSET_WATCHER {
         Asset_Watcher;
     }
-    Count;
 }
-timings: [Timing.Count] float64;
-timings_buf: [Timing.Count] float64;
+TIMING_COUNT :: #run enum_highest_value(Timing)+1;
+timings: [TIMING_COUNT] float64;
+timings_buf: [TIMING_COUNT] float64;
+
+Perf_Stats :: struct {
+    temp_storage_total_bytes_occupied: int;
+    temp_storage_high_water_mark: int;
+}
+perf_stats: Perf_Stats;
 
 mouse_position: Vector2;
 mouse_position_inverted: Vector2;
+mouse_delta: Vector2;
+mouse_delta_inverted: Vector2;
 scroll_vel: Vector2;
 
 keymap: Keymap;
@@ -92,13 +101,6 @@ simpler_init :: (title: string, requested_window_size: Size) {
     // HACK: For pong swapper thing
     if window return;
 
-    #import "String";  // For path_strip_filename. @Cleanup.
-    #import "System";  // For get_path_of_running_executable. @Cleanup.
-
-    path := path_strip_filename(get_path_of_running_executable());
-    set_working_directory(path);
-    log("Working Directory: %\n", path);
-
     #if OS == .WINDOWS {
         Windows :: #import "Windows";
         Windows.SetProcessDPIAware();
@@ -106,6 +108,16 @@ simpler_init :: (title: string, requested_window_size: Size) {
     }
 
     init_logger();
+
+    {
+        #import "String";  // For path_strip_filename. @Cleanup.
+        #import "System";  // For get_path_of_running_executable. @Cleanup.
+
+        path := path_strip_filename(get_path_of_running_executable());
+        set_working_directory(path);
+        log("Working Directory: %\n", path);
+    }
+
     init_render(title, requested_window_size);
     init_fonts();
     init_audio();
@@ -181,8 +193,9 @@ simpler_update :: () {
     t_tick := seconds_since_init();
     while ticks_per_second && tick_accum >= tick_dt {
         game_mode.tick();
-        tick_accum -= tick_dt;
         tick_number += 1;
+        tick_now += tick_dt;
+        tick_accum -= tick_dt;
     }
     timings_buf[Timing.Tick] = seconds_since_init() - t_tick;
 
@@ -198,7 +211,7 @@ simpler_draw :: () {
     timings_buf[Timing.Draw] = seconds_since_init() - t_draw;
 }
 
-end_frame :: (sleep_ms: s32 = 0) {
+end_frame :: () {
     t_audio := seconds_since_init();
     update_audio();
     timings_buf[Timing.Audio] = seconds_since_init() - t_audio;
@@ -211,13 +224,15 @@ end_frame :: (sleep_ms: s32 = 0) {
 
     swap_buffers(window, vsync);
 
+    timings = timings_buf;
+    ts := context.temporary_storage;
+    if ts {
+        perf_stats.temp_storage_total_bytes_occupied = ts.total_bytes_occupied;
+        perf_stats.temp_storage_high_water_mark = max(perf_stats.temp_storage_high_water_mark, ts.high_water_mark);
+    }
+
     reset_temporary_storage();
     memory_visualizer_per_frame_update();
-    //if sleep_ms > 0 {
-    //    sleep_milliseconds(sleep_ms);
-    //}
-
-    timings = timings_buf;
 }
 
 simpler_game_loop :: () {

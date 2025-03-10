@@ -1,5 +1,15 @@
 Size :: struct { x: s64; y: s64; };
+operator + :: (a: Size, b: Size) -> Size {
+    return .{a.x+b.x, a.y+b.y};
+}
+operator == :: (a: Size, b: Size) -> bool {
+    return a.x == b.x && a.y == b.y;
+}
 Pixel :: struct { x: s64; y: s64; };
+
+make_size :: (v: Vector2) -> Size {
+    return .{ xx floor(v.x), xx floor(v.y) };
+}
 
 window: Window_Type;
 window_size: Size;
@@ -11,8 +21,14 @@ window_resizes: [] Window_Resize_Record;
 fullscreen: bool;
 window_focused: bool;
 
-#if ASSET_WATCHER {
-    texture_by_filepath: Table(string, *Texture);
+texture_storage: Bucket_Array(Texture, 64);
+texture_by_filepath: Table(string, Bucket_Locator);  // texture filepath -> texture_storage index
+
+bucket_array_find_pointer :: (using array: *Bucket_Array, locator: Bucket_Locator) -> *array.type {
+    bucket := all_buckets[locator.bucket_index];
+    assert(bucket.occupied[locator.slot_index] == true);
+    result := *bucket.data[locator.slot_index];
+    return result;
 }
 
 init_render :: (title: string, requested_window_size: Size) {
@@ -31,12 +47,26 @@ init_render :: (title: string, requested_window_size: Size) {
     log("window_size: % x %\n", window_size.x, window_size.y);
 }
 
-load_texture :: (texture: *Texture, filepath: string, srgb := false, build_mipmaps := false) {
-    if !texture_load_from_file(texture, filepath, srgb, build_mipmaps) {
-        log_error("Failed to load texture %\n", filepath);
-        return;
+find_or_load_texture :: (filepath: string, srgb := false, build_mipmaps := false, force_reload := false) -> texture: *Texture {
+    texture: *Texture;
+
+    // Find/allocate texture
+    locator, found := table_find(*texture_by_filepath, filepath);
+    if found {
+        texture = bucket_array_find_pointer(*texture_storage, locator);
+    } else {
+        locator, texture = bucket_array_add(*texture_storage, .{});
+        table_add(*texture_by_filepath, filepath, locator);
     }
-    #if ASSET_WATCHER table_add(*texture_by_filepath, filepath, texture);
+
+    // Load, or reload, if necessary
+    if !found || force_reload {
+        if !texture_load_from_file(texture, filepath, srgb, build_mipmaps) {
+            log_error("Failed to load texture '%'\n", filepath);
+            return null;
+        }
+    }
+    return texture;
 }
 
 clear_render_target :: (color: Vector4) {
@@ -53,14 +83,22 @@ draw_rect :: inline (x: float, y: float, w: float, h: float, color := Vector4.{1
 }
 
 // NOTE: origin is bottom left, following the Simp convention
-draw_rect :: (x: float, y: float, w: float, h: float, texture: *Texture = null, color := Vector4.{1,1,1,1}) {
+draw_rect :: (x: float, y: float, w: float, h: float, texture: *Texture = null, color := Vector4.{1,1,1,1}, uv_tl := Vector2.{}, uv_br := Vector2.{1, 1}) {
     x0, y0, x1, y1 := x, y, x + w, y + h;
+    p0 := Vector2.{ x  , y   };
+    p1 := Vector2.{ x  , y+h };
+    p2 := Vector2.{ x+w, y+h };
+    p3 := Vector2.{ x+w, y   };
+    uv0 := uv_tl;
+    uv1 := Vector2.{ uv_tl.x, uv_br.y };
+    uv2 := uv_br;
+    uv3 := Vector2.{ uv_br.x, uv_tl.y };
     if texture {
         set_shader_for_images(texture);
     } else {
         set_shader_for_color(true);
     }
-    immediate_quad(x0, y0, x1, y1, color);
+    immediate_quad(p0, p1, p2, p3, color, uv0, uv1, uv2, uv3);
 }
 
 draw_rect_clamped_to_window :: inline (x: float, y: float, w: float, h: float, color := Vector4.{1,1,1,1}) -> clamp_offset: Vector2 {
@@ -89,7 +127,13 @@ draw_rect_clamped_to_window :: (x: float, y: float, w: float, h: float, texture:
     return clamp_offset;
 }
 
+// x,y is top left of text, instead of baseline
+draw_text_tl :: (font: *Dynamic_Font, x: s64, y: s64, text: string, color := Vector4.{1,1,1,1}, effects: Font_Effects = 0) -> width: s64 {
+    return draw_text(font, x, y + font.character_height + font.typical_descender, text, color, effects);
+}
+
 #scope_file
 
 #import "Simp";
+#import "Bucket_Array";
 #import "Hash_Table";
