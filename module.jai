@@ -97,7 +97,7 @@ switch_game_mode :: (mode: *GameMode) {
     requested_game_mode = mode;
 }
 
-simpler_init :: (title: string, requested_window_size: Size) {
+simpler_init :: (title: string, requested_window_size: Vector2i) {
     // HACK: For pong swapper thing
     if window return;
 

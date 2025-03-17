@@ -3,7 +3,11 @@ point_overlaps_rect :: (p: Vector2, x: float, y: float, w: float, h: float) -> b
 }
 
 mouse_overlaps_rect :: (x: float, y: float, w: float, h: float) -> bool {
-    p := Vector2.{ mouse_position.x, window_size.y - mouse_position.y };
+    #if LEFT_HANDED {
+        p := Vector2.{ mouse_position.x, mouse_position.y };
+    } else {
+        p := Vector2.{ mouse_position.x, window_size.y - mouse_position.y };
+    }
     return point_overlaps_rect(p, x, y, w, h);
 }
 

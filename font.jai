@@ -6,18 +6,22 @@ Font :: struct {
     font: *Dynamic_Font;
 }
 
-fonts: [..] Font;
+fonts: Bucket_Array(Font, 8);
 
 register_font :: (path: string, file: string, pixel_height: int, kern := false) -> *Font {
-    font := array_add(*fonts);
+    font: Font;
     font.path = path;
     font.file = file;
     font.pixel_height = pixel_height;
     font.font = get_font_at_size(path, file, pixel_height);
+    if !font.font {
+        return null;
+    }
     if kern {
         // prepare_for_kerning(font.font);  // hmmm...
     }
-    return font;
+    _, ptr := bucket_array_add(*fonts, font);
+    return ptr;
 }
 
 init_fonts :: () {
@@ -32,7 +36,7 @@ deinit_fonts :: () {
     for fonts {
         release_font(it.font);
     }
-    array_reset(*fonts);
+    bucket_array_reset(*fonts);
 }
 
 // // NOTE: swap_buffers adds extra frames of delay to the loading times.. meh
@@ -70,3 +74,18 @@ draw_prepared_text_shadowed :: (font: *Dynamic_Font, x: s64, y: s64, color := Ve
     }
     draw_prepared_text(font, x, y, color, effects);
 }
+
+
+// x,y is top left of text, instead of baseline
+draw_text_tl :: (font: *Dynamic_Font, x: s64, y: s64, text: string, color := Vector4.{1,1,1,1}, effects: Font_Effects = 0) -> width: s64 {
+    return draw_text(font, x, y + font.character_height + font.typical_descender, text, color, effects);
+}
+
+// x,y is top left of text, instead of baseline
+draw_prepared_text_tl :: (font: *Dynamic_Font, x: s64, y: s64, color := Vector4.{1,1,1,1}, effects: Font_Effects = 0) {
+    draw_prepared_text(font, x, y + font.character_height + font.typical_descender, color, effects);
+}
+
+#scope_file
+
+#import "Bucket_Array";

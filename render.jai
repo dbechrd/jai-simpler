@@ -1,18 +1,5 @@
-Size :: struct { x: s64; y: s64; };
-operator + :: (a: Size, b: Size) -> Size {
-    return .{a.x+b.x, a.y+b.y};
-}
-operator == :: (a: Size, b: Size) -> bool {
-    return a.x == b.x && a.y == b.y;
-}
-Pixel :: struct { x: s64; y: s64; };
-
-make_size :: (v: Vector2) -> Size {
-    return .{ xx floor(v.x), xx floor(v.y) };
-}
-
 window: Window_Type;
-window_size: Size;
+window_size: Vector2i;
 window_center: Vector2;
 
 window_info: Saved_Window_Info;
@@ -21,6 +8,7 @@ window_resizes: [] Window_Resize_Record;
 fullscreen: bool;
 window_focused: bool;
 
+// note: the Table could just store *Texture since Bucket_Array is stable.. hmm...
 texture_storage: Bucket_Array(Texture, 64);
 texture_by_filepath: Table(string, Bucket_Locator);  // texture filepath -> texture_storage index
 
@@ -31,7 +19,7 @@ bucket_array_find_pointer :: (using array: *Bucket_Array, locator: Bucket_Locato
     return result;
 }
 
-init_render :: (title: string, requested_window_size: Size) {
+init_render :: (title: string, requested_window_size: Vector2i) {
     #if ASSET_WATCHER {
         assert(!texture_by_filepath.allocated);
         init(*texture_by_filepath, 64);
@@ -125,11 +113,6 @@ draw_rect_clamped_to_window :: (x: float, y: float, w: float, h: float, texture:
 
     draw_rect(x + clamp_offset.x, y + clamp_offset.y, w, h, texture, color);
     return clamp_offset;
-}
-
-// x,y is top left of text, instead of baseline
-draw_text_tl :: (font: *Dynamic_Font, x: s64, y: s64, text: string, color := Vector4.{1,1,1,1}, effects: Font_Effects = 0) -> width: s64 {
-    return draw_text(font, x, y + font.character_height + font.typical_descender, text, color, effects);
 }
 
 #scope_file
