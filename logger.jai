@@ -23,7 +23,7 @@ simpler_logger :: (message: string, data: *void, info: Log_Info) {
         append(*builder, "\n");
     }
 
-    output := builder_to_string(*builder);
+    output := builder_to_string(*builder,, temp);
     file_write(*log_file, output);
 
     // kernel32 :: #system_library "kernel32";
