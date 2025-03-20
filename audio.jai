@@ -1,5 +1,3 @@
-using,except(update) Sound :: #import "Sound_Player";
-
 default_sound: Sound_Data;
 
 init_audio :: () {
@@ -89,3 +87,4 @@ generate_sine_wave :: (using sound_data: *Sound_Data, sound_name: string, freque
 #scope_file
 
 #load "missing_ogg.jai";
+using Sound :: #import "Sound_Player";

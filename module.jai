@@ -13,6 +13,7 @@
 #load "font.jai";
 #load "input.jai";
 #load "logger.jai";
+#load "parse.jai";
 #load "render.jai";
 #if ASSET_WATCHER {
     #load "watcher.jai";
