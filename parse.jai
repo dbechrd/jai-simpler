@@ -13,6 +13,17 @@ expect_int :: (s: *string, error: string) -> value: int #expand {
     return value;
 }
 
+// note: both bounds inclusive
+expect_int :: (s: *string, min: int, max: int, error: string) -> value: int #expand {
+    value:, success:, s.* = string_to_int(s.*);
+    if !success || value < min || value > max {
+        `return tprint("% Value out of range. Expected % to %, found %.",
+            error, min, max, value);
+    }
+    s.* = eat_spaces(s.*);
+    return value;
+}
+
 expect_string :: (s: *string, error: string) -> value: string #expand {
     value:, s.* = break_by_spaces(s.*);
     if !value {
@@ -28,8 +39,8 @@ expect_string_exact :: (s: *string, expected: string, error: string) #expand {
     if _s.count >= expected.count {
         for expected {
             if !_s || _s[0] != it {
-                log("unexpected string: '%' (expected '%')\n", s, expected);
-                `return error;
+                `return tprint("% Expected '%', found '%'.",
+                    error, expected, s);
             }
             advance(*_s, 1);
         }
