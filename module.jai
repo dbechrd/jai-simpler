@@ -65,23 +65,6 @@ Perf_Stats :: struct {
 }
 perf_stats: Perf_Stats;
 
-mouse_position: Vector2;
-mouse_position_inverted: Vector2;
-mouse_delta: Vector2;
-mouse_delta_inverted: Vector2;
-scroll_vel: Vector2;
-
-keymap: Keymap;
-debug_key_pressed := false;
-debug_key_callback: ();
-
-DebugKey :: () {
-    if debug_key_callback {
-        debug_key_callback();
-    }
-    debug_key_pressed = true;
-}
-
 GameMode :: struct {
     name: string;
     init: ();

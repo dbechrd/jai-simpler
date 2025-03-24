@@ -14,9 +14,9 @@ expect_int :: (s: *string, error: string) -> value: int #expand {
 }
 
 // note: both bounds inclusive
-expect_int :: (s: *string, min: int, max: int, error: string) -> value: int #expand {
+expect_int :: (s: *string, min: int, max: int, error: string, zero_allowed := false) -> value: int #expand {
     value:, success:, s.* = string_to_int(s.*);
-    if !success || value < min || value > max {
+    if !success || ((value < min || value > max) && !(zero_allowed && value == 0)) {
         `return tprint("% Value out of range. Expected % to %, found %.",
             error, min, max, value);
     }
