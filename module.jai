@@ -15,6 +15,7 @@
 #load "logger.jai";
 #load "parse.jai";
 #load "render.jai";
+#load "utils.jai";
 #if ASSET_WATCHER {
     #load "watcher.jai";
 }
