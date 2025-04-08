@@ -16,10 +16,18 @@ expect_int :: (s: *string, error: string) -> value: int #expand {
 // note: both bounds inclusive
 expect_int :: (s: *string, min: int, max: int, error: string, zero_allowed := false) -> value: int #expand {
     value:, success:, s.* = string_to_int(s.*);
-    if !success || ((value < min || value > max) && !(zero_allowed && value == 0)) {
+    if !success {
+        `return tprint("% Expected integer in range % to %.",
+            error, min, max);
+    }
+
+    zero_okay := zero_allowed && value == 0;
+    in_range := (value >= min && value <= max) || zero_okay;
+    if !in_range {
         `return tprint("% Value out of range. Expected % to %, found %.",
             error, min, max, value);
     }
+
     s.* = eat_spaces(s.*);
     return value;
 }

@@ -51,24 +51,25 @@ process_input :: () {
     }
 
     scroll_vel = .{};
+    factor := mouse_delta_z / 120.0;
+    if input_button_states[Key_Code.SHIFT] != .NONE {
+        scroll_vel += .{ factor, 0 };
+    } else {
+        scroll_vel += .{ 0, factor };
+    }
 
     for events_this_frame {
         if keymap_handle_event(keymap, it) {
             continue;
         }
 
-        if it.type == {
-            case .QUIT;
+        #if OS == .WINDOWS {
+            if it.key_code == .F4 && it.alt_pressed {
                 quit = true;
-            case .MOUSE_WHEEL;
-                if it.wheel_delta {
-                    factor := it.wheel_delta / cast(float) it.typical_wheel_delta; // * 10;
-                    if input_button_states[Key_Code.SHIFT] != .NONE {
-                        scroll_vel += .{ factor, 0 };
-                    } else {
-                        scroll_vel += .{ 0, factor };
-                    }
-                }
+            }
+        }
+        if it.type == .QUIT {
+            quit = true;
         }
     }
 }
