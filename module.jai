@@ -3,7 +3,8 @@
     WIN_CONSOLE := false,       // hide console on windows
     LEFT_HANDED := true,        // Simp handedness
     BACKGROUND_AUDIO := false,  // play audio when window minimized (it platform supports it)
-    ASSET_WATCHER := false      // hot reload texture
+    ASSET_WATCHER := false,     // hot reload texture
+    GET_RECT := true            // do GetRect input/update logic
 );
 
 #load "audio.jai";
@@ -155,10 +156,10 @@ begin_frame :: () {
 simpler_update :: () {
     update_window_events();
 
-    // NOTE: This order is important because F11 could generate a window_resize event.
     debug_key_pressed = false;
     process_input();
 
+    // NOTE: This is after process_input() because toggle_fullscreen() could generate a window_resize event.
     window_resizes = get_window_resizes();
     for window_resizes {
         update_window(it.window);
@@ -166,6 +167,10 @@ simpler_update :: () {
             window_size = .{ it.width, it.height };
             window_center = .{ xx (window_size.x / 2), xx (window_size.y / 2) };
         }
+    }
+
+    #if GET_RECT {
+        ui_per_frame_update(window, xx window_size.x, xx window_size.y, now);
     }
 
     if ticks_per_second {
@@ -238,3 +243,6 @@ simpler_game_loop :: () {
 #import "Window_Creation";
 #import "File";
 #import "File_Watcher";
+#if GET_RECT {
+    #import "GetRect_LeftHanded";
+}

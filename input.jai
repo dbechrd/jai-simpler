@@ -11,6 +11,8 @@ keymap: Keymap;
 debug_key_pressed := false;
 debug_key_callback: ();
 
+input_captured := false;
+
 DebugKey :: () {
     if debug_key_callback {
         debug_key_callback();
@@ -58,17 +60,39 @@ process_input :: () {
         scroll_vel += .{ 0, factor };
     }
 
-    for events_this_frame {
-        if keymap_handle_event(keymap, it) {
-            continue;
+    #if GET_RECT {
+        widget_escaped := false;
+        for event: events_this_frame {
+            getrect_handle_event(event);
+
+            if event.type == {
+                case .KEYBOARD;
+                    if GetRect.active_widget && event.key_pressed && event.key_code == .ESCAPE {
+                        active_widget_deactivate_all();
+                        widget_escaped = true;
+                    }
+                //case .DRAG_AND_DROP_FILES;
+                //    for dropped_files free(it);
+                //    array_reset(*dropped_files);
+                //    for event.files array_add(*dropped_files, copy_string(it));
+            }
+        }
+        input_captured = GetRect.some_widget_hovered || GetRect.active_widget || widget_escaped;
+    }
+
+    for event: events_this_frame {
+        if !input_captured {
+            if keymap_handle_event(keymap, event) {
+                continue;
+            }
         }
 
         #if OS == .WINDOWS {
-            if it.key_code == .F4 && it.alt_pressed {
+            if event.key_code == .F4 && event.alt_pressed {
                 quit = true;
             }
         }
-        if it.type == .QUIT {
+        if event.type == .QUIT {
             quit = true;
         }
     }
@@ -79,3 +103,6 @@ process_input :: () {
 #import "Input";
 #import "Keymap";
 #import "Trivial";
+#if GET_RECT {
+    using GetRect :: #import "GetRect_LeftHanded";
+}
