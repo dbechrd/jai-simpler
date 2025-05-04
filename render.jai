@@ -31,7 +31,7 @@ init_render :: (title: string, requested_window_size: Vector2i) {
     window_size.x, window_size.y = get_render_dimensions(window);
     window_center = .{ xx (window_size.x / 2), xx (window_size.y / 2) };
 
-    log("\n--- Render Info ---\n");
+    log("--- Render Info ---\n");
     log("window_size: % x %\n", window_size.x, window_size.y);
 }
 

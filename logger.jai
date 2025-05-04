@@ -13,6 +13,8 @@ simpler_logger :: (message: string, data: *void, info: Log_Info) {
     }
 
     builder: String_Builder;
+    print_to_builder(*builder, "[%] ", seconds_since_init());
+
     if info.common_flags & .ERROR {
         append(*builder, "[Error] ");
     } else if info.common_flags & .WARNING {
@@ -61,7 +63,7 @@ log_preamble :: () {
 }
 
 log_cpu_info :: () {
-    log("\n--- CPU Info ---\n");
+    log("--- CPU Info ---\n");
     cpu_info := get_cpu_info();
     log("vendor : %\n", cpu_info.vendor);
     log("SSE    : %\n", ifx check_feature(cpu_info.feature_leaves, x86_Feature_Flag.SSE) then "Supported" else "Not Supported");

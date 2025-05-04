@@ -1,7 +1,7 @@
 default_sound: Sound_Data;
 
 init_audio :: () {
-    log("\n--- Audio Info ---\n");
+    log("--- Audio Info ---\n");
 
     devices := get_devices();
     log("devices: %\n", devices);
