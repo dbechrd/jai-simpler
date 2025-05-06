@@ -42,6 +42,11 @@ play_sound :: (sound_data: *Sound_Data, category := Sound_Category.GENERAL_SFX, 
     start_playing(stream);
 }
 
+play_sound_random :: (sound_data: [] Sound_Data, category := Sound_Category.GENERAL_SFX, loop := false) {
+    pick_sound := *sound_data[random_get_within_bound(xx sound_data.count)];
+    play_sound(pick_sound, category, loop);
+}
+
 // Example usage:
 //
 //   sine_350: Sound_Data;
@@ -87,4 +92,6 @@ generate_sine_wave :: (using sound_data: *Sound_Data, sound_name: string, freque
 #scope_file
 
 #load "missing_ogg.jai";
+
+#import "PCG";
 using Sound :: #import "Sound_Player";
