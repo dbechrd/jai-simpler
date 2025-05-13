@@ -50,7 +50,7 @@ find_or_load_texture :: (filepath: string, srgb := false, build_mipmaps := false
     // Load, or reload, if necessary
     if !found || force_reload {
         if !texture_load_from_file(texture, filepath, srgb, build_mipmaps) {
-            log_error("Failed to load texture '%'\n", filepath);
+            // log_error("Failed to load texture '%'\n", filepath);  // Simp already logs this
             return null;
         }
     }
