@@ -5,9 +5,24 @@
     BACKGROUND_AUDIO := false,  // play audio when window minimized (it platform supports it)
     ASSET_WATCHER := false,     // hot reload texture
     GET_RECT := true,           // do GetRect input/update logic
+    SDF_FONTS := true,          // replace the font shader with an SDF shader (see note below)
     LOG_SOURCES := true,        // print filenames or inferred sources in the log file for each line
     INFER_LOG_SOURCES := true   // do some magic to figure out which module a log line came from (if LOG_SOURCES=true)
 );
+
+/*
+//---------------------------------------------------
+// Using SDF_FONTS=true requires this patch to Simp:
+//---------------------------------------------------
+Simp/font.jai:814 (top of copy_glyph_to_bitmap)
+
+    if data.utf32 != #char " " {
+        err := FT_Render_Glyph(face.glyph, .SDF);
+        if err {
+            log_error("Failed to render glyph (utf32 = %) as SDF. err = %\n", data.utf32, err);
+        }
+    }
+*/
 
 #load "audio.jai";
 #load "collision.jai";
