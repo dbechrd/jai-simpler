@@ -4,7 +4,9 @@
     LEFT_HANDED := true,        // Simp handedness
     BACKGROUND_AUDIO := false,  // play audio when window minimized (it platform supports it)
     ASSET_WATCHER := false,     // hot reload texture
-    GET_RECT := true            // do GetRect input/update logic
+    GET_RECT := true,           // do GetRect input/update logic
+    LOG_SOURCES := true,        // print filenames or inferred sources in the log file for each line
+    INFER_LOG_SOURCES := true   // do some magic to figure out which module a log line came from (if LOG_SOURCES=true)
 );
 
 #load "audio.jai";

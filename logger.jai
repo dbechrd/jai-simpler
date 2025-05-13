@@ -13,13 +13,55 @@ simpler_logger :: (message: string, data: *void, info: Log_Info) {
     }
 
     builder: String_Builder;
-    print_to_builder(*builder, "[%] ", seconds_since_init());
 
-    if info.common_flags & .ERROR {
-        append(*builder, "[Error] ");
-    } else if info.common_flags & .WARNING {
-        append(*builder, "[Warning] ");
+    // timestamp
+    print_to_builder(*builder, "[%s]", seconds_since_init());
+
+    // log source
+    #if LOG_SOURCES {
+        if info.location.line_number {
+            before := builder_string_length(*builder);
+
+            #if INFER_LOG_SOURCES {
+                log_source := info.location.fully_pathed_filename;
+                module_split := split(log_source, "modules/");
+                if module_split.count > 1 {
+                    log_source = split(module_split[module_split.count-1], "/")[0];
+                    print_to_builder(*builder, "[ %", log_source);
+                } else {
+                    print_to_builder(*builder, "[ ");
+                }
+                PAD_RIGHT :: 16;
+            } else {
+                print_to_builder(*builder, "[%:%", info.location.fully_pathed_filename, info.location.line_number);
+                PAD_RIGHT :: 80;
+            }
+
+            if PAD_RIGHT {
+                bytes := builder_string_length(*builder) - before;
+                if bytes < PAD_RIGHT {
+                    for 0..PAD_RIGHT-bytes-1 {
+                        append(*builder, " ");
+                    }
+                }
+            }
+            append(*builder, " ]");
+        }
     }
+
+    // log level
+    {
+        before := builder_string_length(*builder);
+        if info.common_flags & .ERROR {
+            append(*builder, "[ Error   ] ");
+        } else if info.common_flags & .WARNING {
+            append(*builder, "[ Warning ] ");
+        } else {
+            append(*builder, "[         ] ");
+        }
+    }
+
+    // message
     append(*builder, message);
     if message[message.count-1] != #char "\n" {
         append(*builder, "\n");
