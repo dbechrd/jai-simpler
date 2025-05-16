@@ -195,7 +195,7 @@ simpler_update :: () {
     if ticks_per_second {
         tick_accum += frame_dt;
         // re-sync tick accumulator when there are big frame time spikes
-        tick_accum = clamp(tick_accum, 0, tick_dt * 3);
+        // tick_accum = clamp(tick_accum, 0, tick_dt * 3);
     }
 
     // fixed physics tick
