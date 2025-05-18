@@ -189,7 +189,8 @@ simpler_update :: () {
     }
 
     #if GET_RECT {
-        ui_per_frame_update(window, xx window_size.x, xx window_size.y, now);
+        // IDK WHAT THESE MEANNN
+        occluded, is_active := ui_per_frame_update(window, xx window_size.x, xx window_size.y, now);
     }
 
     if ticks_per_second {
@@ -263,5 +264,5 @@ simpler_game_loop :: () {
 #import "File";
 #import "File_Watcher";
 #if GET_RECT {
-    #import "GetRect_LeftHanded";
+    using GetRect :: #import "GetRect_LeftHanded";
 }

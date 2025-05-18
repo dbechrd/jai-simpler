@@ -1,17 +1,6 @@
 log_file_path := "log.txt";
 
-simpler_logger :: (message: string, data: *void, info: Log_Info) {
-    assert(log_file.handle != null);
-
-    if !message then return;
-
-    if info.common_flags & .VERY_VERBOSE_ONLY && context.log_level < .VERY_VERBOSE {
-        return;
-    }
-    if info.common_flags & .VERBOSE_ONLY && context.log_level < .VERBOSE {
-        return;
-    }
-
+simpler_build_log_message :: (message: string, data: *void, info: Log_Info) -> string {
     builder: String_Builder;
 
     // timestamp
@@ -69,6 +58,22 @@ simpler_logger :: (message: string, data: *void, info: Log_Info) {
     }
 
     output := builder_to_string(*builder,, temp);
+    return output;
+};
+
+simpler_logger :: (message: string, data: *void, info: Log_Info) {
+    assert(log_file.handle != null);
+
+    if !message then return;
+
+    if info.common_flags & .VERY_VERBOSE_ONLY && context.log_level < .VERY_VERBOSE {
+        return;
+    }
+    if info.common_flags & .VERBOSE_ONLY && context.log_level < .VERBOSE {
+        return;
+    }
+
+    output := simpler_build_log_message(message, data, info);
     file_write(*log_file, output);
 
     // kernel32 :: #system_library "kernel32";

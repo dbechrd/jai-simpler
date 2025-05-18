@@ -11,13 +11,18 @@ keymap: Keymap;
 debug_key_pressed := false;
 debug_key_callback: ();
 
-input_captured := false;
+//input_captured_mouse := false;
+//input_captured_keyboard := false;
 
 DebugKey :: () {
     if debug_key_callback {
         debug_key_callback();
     }
     debug_key_pressed = true;
+}
+
+register_key_proc :: (keymap: *Keymap, ident: Code) #expand {
+    add_proc(keymap, #run get_identifier_name(ident), #insert ident);
 }
 
 is_key_down_start :: inline (button: Key_Code) -> bool {
@@ -28,8 +33,20 @@ is_key_down :: inline (button: Key_Code) -> bool {
     return cast(bool) (input_button_states[button] & .DOWN);
 }
 
-register_key_proc :: (keymap: *Keymap, ident: Code) #expand {
-    add_proc(keymap, #run get_identifier_name(ident), #insert ident);
+is_mouse_keycode :: (key_code: Key_Code) -> bool {
+    return key_code == .MOUSE_BUTTON_LEFT
+        || key_code == .MOUSE_BUTTON_MIDDLE
+        || key_code == .MOUSE_BUTTON_RIGHT
+        || key_code == .MOUSE_WHEEL_UP
+        || key_code == .MOUSE_WHEEL_DOWN;
+}
+
+is_mouse_event :: (event: Event) -> bool {
+    return event.type == .MOUSE_WHEEL || (event.type == .KEYBOARD && is_mouse_keycode(event.key_code));
+}
+
+is_keyboard_event :: (event: Event) -> bool {
+    return event.type == .KEYBOARD && !is_mouse_keycode(event.key_code);
 }
 
 process_input :: () {
@@ -60,31 +77,30 @@ process_input :: () {
         scroll_vel += .{ 0, factor };
     }
 
-    #if GET_RECT {
-        widget_escaped := false;
-        for event: events_this_frame {
+    for event: events_this_frame {
+        #if GET_RECT {
             getrect_handle_event(event);
 
-            if event.type == {
-                case .KEYBOARD;
-                    if GetRect.active_widget && event.key_pressed && event.key_code == .ESCAPE {
-                        active_widget_deactivate_all();
-                        widget_escaped = true;
-                    }
-                //case .DRAG_AND_DROP_FILES;
-                //    for dropped_files free(it);
-                //    array_reset(*dropped_files);
-                //    for event.files array_add(*dropped_files, copy_string(it));
-            }
-        }
-        input_captured = GetRect.some_widget_hovered || GetRect.active_widget || widget_escaped;
-    }
-
-    for event: events_this_frame {
-        if !input_captured {
-            if keymap_handle_event(keymap, event) {
+            if GetRect.active_widget && event.type == .KEYBOARD && event.key_code == .ESCAPE {
+                active_widget_deactivate_all();
                 continue;
             }
+
+            getrect_captured_mouse := GetRect.occluder_under_the_cursor != null;
+            getrect_captured_keyboard := GetRect.active_widget != null;
+
+            // Check if event should be ignored due to GetRect captures
+            if getrect_captured_mouse && is_mouse_event(event) {
+               continue;
+            }
+            if getrect_captured_keyboard && is_keyboard_event(event) {
+               continue;
+            }
+        }
+
+        // Try to handle the event via the keymap
+        if keymap_handle_event(keymap, event) {
+            continue;
         }
 
         #if OS == .WINDOWS {
