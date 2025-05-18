@@ -17,11 +17,12 @@ simpler_logger :: (message: string, data: *void, info: Log_Info) {
     // timestamp
     print_to_builder(*builder, "[%s]", seconds_since_init());
 
-    // log source
+    // log the source of message
     #if LOG_SOURCES {
         if info.location.line_number {
             before := builder_string_length(*builder);
 
+            // try to extract the module name, rather than just printing fully qualified file paths (YMMV)
             #if INFER_LOG_SOURCES {
                 log_source := info.location.fully_pathed_filename;
                 module_split := split(log_source, "modules/");

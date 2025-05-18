@@ -21,8 +21,8 @@ return_if :: (condition: bool, error: string) #expand {
     }
 }
 
-expect_int :: (s: *string, desc: string) -> value: int #expand {
-    value:, success:, s.* = string_to_int(s.*);
+expect_int :: (s: *string, desc: string, base := 10, $T := int) -> value: T #expand {
+    value:, success:, s.* = string_to_int(s.*, base, T);
     if !success {
         `return tprint("Expected integer (%)", desc);
     }
@@ -31,8 +31,8 @@ expect_int :: (s: *string, desc: string) -> value: int #expand {
 }
 
 // note: both bounds inclusive
-expect_int :: (s: *string, min: int, max: int, desc: string, zero_allowed := false) -> value: int #expand {
-    value:, success:, s.* = string_to_int(s.*);
+expect_int :: (s: *string, min: int, max: int, desc: string, base := 10, $T := int, zero_allowed := false) -> value: T #expand {
+    value:, success:, s.* = string_to_int(s.*, base, T);
     if !success {
         `return tprint("Expected integer (%) in range % to %.",
             desc, min, max);
