@@ -5,19 +5,13 @@ window_center: Vector2;
 window_info: Saved_Window_Info;
 window_resizes: [] Window_Resize_Record;
 
+vsync: bool = true;
 fullscreen: bool;
 window_focused: bool;
 
 // note: the Table could just store *Texture since Bucket_Array is stable.. hmm...
 texture_storage: Bucket_Array(Texture, 64);
 texture_by_filepath: Table(string, Bucket_Locator);  // texture filepath -> texture_storage index
-
-bucket_array_find_pointer :: (using array: *Bucket_Array, locator: Bucket_Locator) -> *array.type {
-    bucket := all_buckets[locator.bucket_index];
-    assert(bucket.occupied[locator.slot_index] == true);
-    result := *bucket.data[locator.slot_index];
-    return result;
-}
 
 init_render :: (title: string, requested_window_size: Vector2i) {
     #if ASSET_WATCHER {
@@ -33,6 +27,38 @@ init_render :: (title: string, requested_window_size: Vector2i) {
 
     log("--- Render Info ---\n");
     log("window_size: % x %\n", window_size.x, window_size.y);
+}
+
+
+clear_render_target :: (color: Vector4) {
+    clear_render_target(
+        color.x,
+        color.y,
+        color.z,
+        color.w
+    );
+}
+
+toggle_fullscreen :: () {
+    fullscreen = !fullscreen;
+    #if OS == .WINDOWS {
+        toggle_fullscreen(window, fullscreen, *window_info);
+    }
+}
+
+toggle_vsync :: () {
+    vsync = !vsync;
+    #if OS == .WINDOWS {
+        #import "GL";
+        wglSwapIntervalEXT(xx vsync);
+    }
+}
+
+bucket_array_find_pointer :: (using array: *Bucket_Array, locator: Bucket_Locator) -> *array.type {
+    bucket := all_buckets[locator.bucket_index];
+    assert(bucket.occupied[locator.slot_index] == true);
+    result := *bucket.data[locator.slot_index];
+    return result;
 }
 
 find_or_load_texture :: (filepath: string, srgb := false, build_mipmaps := false, force_reload := false) -> texture: *Texture {
@@ -55,15 +81,6 @@ find_or_load_texture :: (filepath: string, srgb := false, build_mipmaps := false
         }
     }
     return texture;
-}
-
-clear_render_target :: (color: Vector4) {
-    clear_render_target(
-        color.x,
-        color.y,
-        color.z,
-        color.w
-    );
 }
 
 draw_rect :: inline (x: float, y: float, w: float, h: float, color := Vector4.{1,1,1,1}) {

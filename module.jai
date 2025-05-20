@@ -49,7 +49,6 @@ quit: bool;  // you can set this manually
 
 // Internal state, but not hidden because you might want to log/display them.
 // Use set_tps() to set the tick rate.
-vsync: bool = true;
 now: float64;
 frame_number: int;
 frame_dt: float64;

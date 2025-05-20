@@ -1,3 +1,4 @@
+// TODO: Replace with new random_seed() overload in next beta
 make_random_seed :: () -> u64 {
     #if CPU == .X64 {
         #import "Machine_X64";
