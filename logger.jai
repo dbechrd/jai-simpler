@@ -83,11 +83,17 @@ simpler_logger :: (message: string, data: *void, info: Log_Info) {
     // FlushFileBuffers(log_file.handle);
 };
 
-init_logger :: () {
+simpler_print_style :: () {
     context.log_level = .VERY_VERBOSE;
     context.print_style.default_format_struct.use_long_form_if_more_than_this_many_members = -1;
     context.print_style.default_format_struct.use_newlines_if_long_form = true;
     context.print_style.default_format_array.stop_printing_after_this_many_elements = 1000;
+    context.print_style.default_format_float.trailing_width = 3;
+    context.print_style.default_format_float.zero_removal = .NO;
+}
+
+init_logger :: () {
+    simpler_print_style();
 
     file, success := file_open(log_file_path, for_writing=true, keep_existing_content=false);
     if !success return;

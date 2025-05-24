@@ -25,8 +25,10 @@ asset_watcher: File_Watcher(string);
 
 asset_changed :: (watcher: *File_Watcher(string), change: *File_Change, user_data: *string) {
     if change.events & .MODIFIED {
-        log("[asset_watcher] Reloading texture %...\n", change.full_path);
-        find_or_load_texture(change.full_path, force_reload=true);
+        if ends_with(change.full_path, ".png") {
+            log("[asset_watcher] Reloading texture %...\n", change.full_path);
+            find_or_load_texture(change.full_path, force_reload=true);
+        }
         //log("[asset_watcher] Change for path %: % (user_data points to %)", change.full_path, change.events, <<user_data);
     }
 }
