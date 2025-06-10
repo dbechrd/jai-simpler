@@ -132,6 +132,27 @@ draw_rect_clamped_to_window :: (x: float, y: float, w: float, h: float, texture:
     return clamp_offset;
 }
 
+draw_circle :: (center: Vector2, radius: float, color: Vector4, segments := 16, pct_visible := 1.0) {
+    // draw manual triangle fan clockwise from 12 o'clock. triangle vertices counter-clockwise from the center.
+    delta := 2*PI / segments;
+    theta := -PI/2;  // 12 o'clock
+    theta_max := -PI/2 + 2*PI * pct_visible;
+    c := Vector3.{center.x, center.y, 0};
+    r0: Vector3 = ---;
+    r1 := Vector3.{cos(theta), sin(theta), 0};
+    done := false;
+    for 0..segments-1 if !done {
+        theta += delta;
+        if theta >= theta_max {
+            theta = theta_max;
+            done = true;
+        }
+        r0 = r1;
+        r1 = .{cos(theta), sin(theta), 0};
+        immediate_triangle(c, c+r1*radius, c+r0*radius, color, color, color);
+    }
+}
+
 #scope_file
 
 #import "Simp";
