@@ -59,10 +59,11 @@ deinit_fonts :: () {
 // }
 
 draw_text_shadowed :: (font: *Dynamic_Font, x: s64, y: s64, text: string, color := Vector4.{0.95, 0.95, 0.95, 1},
-                       shadow_color := Vector4.{0, 0, 0, -1}, effects: Font_Effects = 0)
+                       shadow_color := Vector4.{0, 0, 0, -1}, effects: Font_Effects = 0) -> width: s64
 {
-    prepare_text(font, text, effects);
+    w := prepare_text(font, text, effects);
     draw_prepared_text_shadowed(font, x, y, color, shadow_color, effects);
+    return w;
 }
 
 draw_prepared_text_shadowed :: (font: *Dynamic_Font, x: s64, y: s64, color := Vector4.{0.95, 0.95, 0.95, 1},
@@ -94,6 +95,16 @@ draw_text_tl :: (font: *Dynamic_Font, x: s64, y: s64, text: string, color := Vec
 // x,y is top left of text, instead of baseline
 draw_prepared_text_tl :: (font: *Dynamic_Font, x: s64, y: s64, color := Vector4.{1,1,1,1}, effects: Font_Effects = 0) {
     draw_prepared_text(font, x, y + font.character_height + font.typical_descender, color, effects);
+}
+
+// x,y is top left of text, instead of baseline
+draw_text_shadowed_tl :: (font: *Dynamic_Font, x: s64, y: s64, text: string, color := Vector4.{1,1,1,1}, shadow_color := Vector4.{0, 0, 0, -1}, effects: Font_Effects = 0) -> width: s64 {
+    return draw_text_shadowed(font, x, y + font.character_height + font.typical_descender, text, color, shadow_color, effects);
+}
+
+// x,y is top left of text, instead of baseline
+draw_prepared_text_shadowed_tl :: (font: *Dynamic_Font, x: s64, y: s64, color := Vector4.{1,1,1,1}, shadow_color := Vector4.{0, 0, 0, -1}, effects: Font_Effects = 0) {
+    draw_prepared_text_shadowed(font, x, y + font.character_height + font.typical_descender, color, shadow_color, effects);
 }
 
 #scope_file
