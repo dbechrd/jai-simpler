@@ -1,13 +1,14 @@
 #module_parameters ()(
     MEMORY_DEBUGGER := false,
-    WIN_CONSOLE := false,       // hide console on windows
-    LEFT_HANDED := true,        // Simp handedness
-    BACKGROUND_AUDIO := false,  // play audio when window minimized (it platform supports it)
-    ASSET_WATCHER := false,     // hot reload texture
-    GET_RECT := true,           // do GetRect input/update logic
-    SDF_FONTS := true,          // replace the font shader with an SDF shader (see note below)
-    LOG_SOURCES := true,        // print filenames or inferred sources in the log file for each line
-    INFER_LOG_SOURCES := true   // do some magic to figure out which module a log line came from (if LOG_SOURCES=true)
+    WIN_CONSOLE := false,         // hide console on windows
+    LEFT_HANDED := true,          // Simp handedness
+    BACKGROUND_AUDIO := false,    // play audio when window minimized (it platform supports it)
+    ASSET_WATCHER := false,       // hot reload texture
+    GET_RECT := true,             // do GetRect input/update logic
+    SDF_FONTS := true,            // replace the font shader with an SDF shader (see note below)
+    LOG_SOURCES := true,          // print filenames or inferred sources in the log file for each line
+    INFER_LOG_SOURCES := true,    // do some magic to figure out which module a log line came from (if LOG_SOURCES=true)
+    ONE_TICK_PER_FRAME := false   // for debugging, don't run many ticks at once when accumulator is high
 );
 
 /*
@@ -192,7 +193,7 @@ simpler_update :: () {
         occluded, is_active := ui_per_frame_update(window, xx window_size.x, xx window_size.y, now);
     }
 
-    if ticks_per_second {
+    if ticks_per_second && tick_number {
         tick_accum += frame_dt;
         // re-sync tick accumulator when there are big frame time spikes
         // tick_accum = clamp(tick_accum, 0, tick_dt * 3);
@@ -201,10 +202,13 @@ simpler_update :: () {
     // fixed physics tick
     t_tick := seconds_since_init();
     while ticks_per_second && tick_accum >= tick_dt {
-        game_mode.tick();
         tick_number += 1;
+        game_mode.tick();
         tick_now += tick_dt;
         tick_accum -= tick_dt;
+        #if ONE_TICK_PER_FRAME {
+            break;
+        }
     }
     timings_buf[Timing.Tick] = seconds_since_init() - t_tick;
 
