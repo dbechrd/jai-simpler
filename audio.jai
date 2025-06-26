@@ -32,13 +32,19 @@ update_audio :: () {
     Sound.update();
 }
 
-play_sound :: (sound_data: *Sound_Data, category := Sound_Category.GENERAL_SFX, loop := false) {
+// note: perturb flag ignored when looping, because there's no easy way to vary it per loop iteration right now
+play_sound :: (sound_data: *Sound_Data, category := Sound_Category.GENERAL_SFX, perturb := false, loop := false) {
     stream := make_stream(sound_data, category);
     if sound_data.type == .OGG_COMPRESSED {
         // HACK: If an .ogg isn't big enough to finish loading "initial pages", we need to disable the wait.
         stream.internal_flags &= ~.WAITING_FOR_INITIAL_DECODER_PAGES;
     }
-    set_repeating(stream, loop);
+    if loop {
+        set_repeating(stream, loop);
+    } else if perturb {
+        stream.user_volume_scale = random_get_within_range(0.5,  1);
+        stream.rate_scale        = random_get_within_range(0.75, 1.22);
+    }
     start_playing(stream);
 }
 
