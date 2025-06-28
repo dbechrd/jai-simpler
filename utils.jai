@@ -14,6 +14,17 @@ make_random_seed :: () -> u64 {
     return time_hash;
 }
 
+image_to_ico :: (image_path: string, ico_path: string) {
+    #if OS == .WINDOWS {
+        #import "Ico_File";
+        #import "File";
+        ico_data := create_ico_file_from_bitmap_filename(image_path);
+        write_entire_file(ico_path, ico_data);
+    } else {
+        log_error("Generating icons is only supported on Windows.\n");
+    }
+}
+
 #scope_file
 
 #import "Hash";
