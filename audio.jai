@@ -45,7 +45,7 @@ play_sound :: (sound_data: *Sound_Data, category := Sound_Category.GENERAL_SFX, 
         set_repeating(stream, loop);
     } else if perturb {
         // stream.user_volume_scale = random_get_within_range(0.5,  1);
-        stream.rate_scale        = random_get_within_range(0.75, 1.22);
+        stream.rate_scale = random_get_within_range(0.8, 1.2);
     }
     start_playing(stream);
 }
