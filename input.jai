@@ -81,15 +81,19 @@ process_input :: () {
         #if GET_RECT {
             getrect_handle_event(event);
 
-            if GetRect.active_widget && event.type == .KEYBOARD && event.key_code == .ESCAPE {
-                active_widget_deactivate_all();
-                continue;
-            }
+            // Wait.. why would I need this? It should be handled by getrect_captured_keyboard below?
 
-            getrect_captured_mouse := GetRect.occluder_under_the_cursor != null;
-            getrect_captured_keyboard := GetRect.active_widget != null;
+            //// If GetRect is going to handle the ESCAPE, don't forward it elsewhere.
+            //if GetRect.active_widget && event.type == .KEYBOARD && event.key_code == .ESCAPE {
+            //    // This causes the ESCAPE to not be handled properly by GetRect. Idk why I put this here originally,
+            //    // but let's leave it commented out for now.
+            //    //active_widget_deactivate_all();
+            //    continue;
+            //}
 
             // Check if event should be ignored due to GetRect captures
+            getrect_captured_mouse := GetRect.occluder_under_the_cursor != null;
+            getrect_captured_keyboard := GetRect.active_widget != null;
             if getrect_captured_mouse && is_mouse_event(event) {
                continue;
             }
