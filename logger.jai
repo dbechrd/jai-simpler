@@ -14,9 +14,9 @@ simpler_build_log_message :: (message: string, data: *void, info: Log_Info) -> s
             // try to extract the module name, rather than just printing fully qualified file paths (YMMV)
             #if INFER_LOG_SOURCES {
                 log_source := info.location.fully_pathed_filename;
-                module_split := split(log_source, "modules/");
+                module_split := split(log_source, "modules/",, temp);
                 if module_split.count > 1 {
-                    log_source = split(module_split[module_split.count-1], "/")[0];
+                    log_source = split(module_split[module_split.count-1], "/",, temp)[0];
                     print_to_builder(*builder, "[ %", log_source);
                 } else {
                     print_to_builder(*builder, "[ ");

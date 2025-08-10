@@ -132,6 +132,18 @@ draw_rect_clamped_to_window :: (x: float, y: float, w: float, h: float, texture:
     return clamp_offset;
 }
 
+draw_rect_outline :: (x: float, y: float, w: float, h: float, color := Vector4.{1,1,1,1}, thickness: float = 1.0) {
+    p0 := Vector2.{ x     , y     };  // bl
+    p1 := Vector2.{ x + w , y     };  // br
+    p2 := Vector2.{ x + w , y + h };  // tr
+    p3 := Vector2.{ x     , y + h };  // tl
+    set_shader_for_color(true);
+    immediate_line(p0, p1, thickness, color);
+    immediate_line(p1, p2, thickness, color);
+    immediate_line(p2, p3, thickness, color);
+    immediate_line(p3, p0, thickness, color);
+}
+
 draw_circle :: (center: Vector2, radius: float, color: Vector4, segments := 16, pct_visible := 1.0) {
     // draw manual triangle fan clockwise from 12 o'clock. triangle vertices counter-clockwise from the center.
     delta := 2*PI / segments;
