@@ -83,12 +83,12 @@ find_or_load_texture :: (filepath: string, srgb := false, build_mipmaps := false
     return texture;
 }
 
-draw_rect :: inline (x: float, y: float, w: float, h: float, color := Vector4.{1,1,1,1}) {
-    draw_rect(x, y, w, h, null, color);
+draw_rect :: inline (x: float, y: float, w: float, h: float, color := Vector4.{1,1,1,1}, outline_color := Black, outline_thickness := 0.0) {
+    draw_rect(x, y, w, h, null, color, outline_color=outline_color, outline_thickness=outline_thickness);
 }
 
 // NOTE: origin is bottom left, following the Simp convention
-draw_rect :: (x: float, y: float, w: float, h: float, texture: *Texture = null, color := Vector4.{1,1,1,1}, uv_tl := Vector2.{}, uv_br := Vector2.{1, 1}) {
+draw_rect :: (x: float, y: float, w: float, h: float, texture: *Texture = null, color := Vector4.{1,1,1,1}, uv_tl := Vector2.{}, uv_br := Vector2.{1, 1}, outline_color := Black, outline_thickness := 0.0) {
     x0, y0, x1, y1 := x, y, x + w, y + h;
     p0 := Vector2.{ x  , y   };
     p1 := Vector2.{ x  , y+h };
@@ -104,6 +104,9 @@ draw_rect :: (x: float, y: float, w: float, h: float, texture: *Texture = null, 
         set_shader_for_color(true);
     }
     immediate_quad(p0, p1, p2, p3, color, uv0, uv1, uv2, uv3);
+    if outline_thickness {
+        draw_rect_outline(x, y, w, h, outline_color, outline_thickness);
+    }
 }
 
 draw_rect_clamped_to_window :: inline (x: float, y: float, w: float, h: float, color := Vector4.{1,1,1,1}) -> clamp_offset: Vector2 {
@@ -133,15 +136,15 @@ draw_rect_clamped_to_window :: (x: float, y: float, w: float, h: float, texture:
 }
 
 draw_rect_outline :: (x: float, y: float, w: float, h: float, color := Vector4.{1,1,1,1}, thickness: float = 1.0) {
-    p0 := Vector2.{ x     , y     };  // bl
-    p1 := Vector2.{ x + w , y     };  // br
-    p2 := Vector2.{ x + w , y + h };  // tr
-    p3 := Vector2.{ x     , y + h };  // tl
+    p0 := Vector2.{ x-thickness/2     , y-thickness/2     };  // tl
+    p1 := Vector2.{ x+thickness/2 + w , y-thickness/2     };  // tr
+    p2 := Vector2.{ x-thickness/2     , y+thickness/2 + h };  // bl
+    p3 := Vector2.{ x+thickness/2 + w , y+thickness/2 + h };  // br
     set_shader_for_color(true);
-    immediate_line(p0, p1, thickness, color);
-    immediate_line(p1, p2, thickness, color);
-    immediate_line(p2, p3, thickness, color);
-    immediate_line(p3, p0, thickness, color);
+    immediate_line(p0-.{thickness/2, 0}, p1+.{thickness/2, 0}, thickness, color);  // top
+    immediate_line(p2-.{thickness/2, 0}, p3+.{thickness/2, 0}, thickness, color);  // bottom
+    immediate_line(p1, p3, thickness, color);  // right
+    immediate_line(p2, p0, thickness, color);  // left
 }
 
 draw_circle :: (center: Vector2, radius: float, color: Vector4, segments := 16, pct_visible := 1.0) {
