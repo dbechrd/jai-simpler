@@ -54,12 +54,12 @@ toggle_vsync :: () {
     }
 }
 
-bucket_array_find_pointer :: (using array: *Bucket_Array, locator: Bucket_Locator) -> *array.type {
-    bucket := all_buckets[locator.bucket_index];
-    assert(bucket.occupied[locator.slot_index] == true);
-    result := *bucket.data[locator.slot_index];
-    return result;
-}
+// bucket_array_find_pointer :: (using array: *Bucket_Array, locator: Bucket_Locator) -> *array.type {
+//     bucket := all_buckets[locator.bucket_index];
+//     assert(bucket.occupied[locator.slot_index] == true);
+//     result := *bucket.data[locator.slot_index];
+//     return result;
+// }
 
 find_or_load_texture :: (filepath: string, srgb := false, build_mipmaps := false, force_reload := false) -> texture: *Texture {
     texture: *Texture;
@@ -83,12 +83,12 @@ find_or_load_texture :: (filepath: string, srgb := false, build_mipmaps := false
     return texture;
 }
 
-draw_rect :: inline (x: float, y: float, w: float, h: float, color := Vector4.{1,1,1,1}, outline_color := Black, outline_thickness := 0.0) {
-    draw_rect(x, y, w, h, null, color, outline_color=outline_color, outline_thickness=outline_thickness);
-}
+//draw_rect :: inline (x: float, y: float, w: float, h: float, color := Vector4.{1,1,1,1}, outline_color := Black, outline_thickness := 0.0) {
+//    draw_rect(x, y, w, h, null, color, outline_color=outline_color, outline_thickness=outline_thickness);
+//}
 
 // NOTE: origin is bottom left, following the Simp convention
-draw_rect :: (x: float, y: float, w: float, h: float, texture: *Texture = null, color := Vector4.{1,1,1,1}, uv_tl := Vector2.{}, uv_br := Vector2.{1, 1}, outline_color := Black, outline_thickness := 0.0) {
+draw_rect :: (x: float, y: float, w: float, h: float, color := Vector4.{1,1,1,1}, texture: *Texture = null, uv_tl := Vector2.{}, uv_br := Vector2.{1, 1}, outline_color := Black, outline_thickness := 0.0) {
     x0, y0, x1, y1 := x, y, x + w, y + h;
     p0 := Vector2.{ x  , y   };
     p1 := Vector2.{ x  , y+h };
@@ -109,11 +109,11 @@ draw_rect :: (x: float, y: float, w: float, h: float, texture: *Texture = null, 
     }
 }
 
-draw_rect_clamped_to_window :: inline (x: float, y: float, w: float, h: float, color := Vector4.{1,1,1,1}) -> clamp_offset: Vector2 {
-    return draw_rect_clamped_to_window(x, y, w, h, null, color);
-}
+//draw_rect_clamped_to_window :: inline (x: float, y: float, w: float, h: float, color := Vector4.{1,1,1,1}, outline_color := Black, //outline_thickness := 0.0) -> clamp_offset: Vector2 {
+//    return draw_rect_clamped_to_window(x, y, w, h, null, color, outline_color, outline_thickness);
+//}
 
-draw_rect_clamped_to_window :: (x: float, y: float, w: float, h: float, texture: *Texture = null, color := Vector4.{1,1,1,1}) -> clamp_offset: Vector2 {
+draw_rect_clamped_to_window :: (x: float, y: float, w: float, h: float, color := Vector4.{1,1,1,1}, texture: *Texture = null, outline_color := Black, outline_thickness := 0.0) -> clamp_offset: Vector2 {
     x0, y0, x1, y1 := x, y, x + w, y + h;
 
     clamp_offset: Vector2;
@@ -131,7 +131,12 @@ draw_rect_clamped_to_window :: (x: float, y: float, w: float, h: float, texture:
         clamp_offset.y = window_size.y - y1;
     }
 
-    draw_rect(x + clamp_offset.x, y + clamp_offset.y, w, h, texture, color);
+    x_clamp := x + clamp_offset.x;
+    y_clamp := y + clamp_offset.y;
+    draw_rect(x_clamp, y_clamp, w, h, color, texture);
+    if outline_thickness {
+        draw_rect(x_clamp, y_clamp, w, h, color);
+    }
     return clamp_offset;
 }
 
