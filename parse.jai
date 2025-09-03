@@ -17,15 +17,14 @@ expect_eof :: (handler: *Text_File_Handler) #expand {
 
 return_if :: (condition: bool, error: string) #expand {
     if condition {
-        `return error;
+        `return false, error;
     }
 }
 
 expect_int :: (s: *string, desc: string, base := 10, $T := int) -> value: T #expand {
     value:, success:, s.* = string_to_int(s.*, base, T);
-    if !success {
-        `return tprint("Expected integer (%)", desc);
-    }
+    return_if(!success, tprint("Expected integer (%)", desc));
+
     s.* = eat_spaces(s.*);
     return value;
 }
@@ -33,17 +32,11 @@ expect_int :: (s: *string, desc: string, base := 10, $T := int) -> value: T #exp
 // note: both bounds inclusive
 expect_int :: (s: *string, min: int, max: int, desc: string, base := 10, $T := int, zero_allowed := false) -> value: T #expand {
     value:, success:, s.* = string_to_int(s.*, base, T);
-    if !success {
-        `return tprint("Expected integer (%) in range % to %.",
-            desc, min, max);
-    }
+    return_if(!success, tprint("Expected integer (%) in range % to %.", desc, min, max));
 
     zero_okay := zero_allowed && value == 0;
     in_range := (value >= min && value <= max) || zero_okay;
-    if !in_range {
-        `return tprint("Expected integer (%) in range % to %. Found '%'.",
-            desc, min, max, value);
-    }
+    return_if(!in_range, tprint("Expected integer (%) in range % to %. Found '%'.", desc, min, max, value));
 
     s.* = eat_spaces(s.*);
     return value;
@@ -51,9 +44,8 @@ expect_int :: (s: *string, min: int, max: int, desc: string, base := 10, $T := i
 
 expect_string :: (s: *string, desc: string) -> value: string #expand {
     value:, s.* = break_by_spaces(s.*);
-    if !value {
-        `return #run tprint("Expected string (%)", desc);
-    }
+    return_if(!value, tprint("Expected string (%)", desc));
+
     return value;
 }
 
@@ -63,10 +55,7 @@ expect_string_value :: (s: *string, desc: string, value: string) #expand {
     _s := s.*;
     if _s.count >= value.count {
         for value {
-            if !_s || _s[0] != it {
-                `return tprint("Expected '%' (%), found '%'.",
-                    value, desc, s);
-            }
+            return_if(!_s || _s[0] != it, tprint("Expected '%' (%), found '%'.", value, desc, s));
             advance(*_s, 1);
         }
     }
