@@ -8,7 +8,7 @@ mouse_delta_inverted: Vector2;
 scroll_vel: Vector2;
 
 keymap: Keymap;
-debug_key_pressed := false;
+debug_key_pressed := false;  // note: doesn't happen every frame, based on OS key repeat rate
 debug_key_callback: ();
 
 //input_captured_mouse := false;
