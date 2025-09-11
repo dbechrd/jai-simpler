@@ -11,8 +11,8 @@ keymap: Keymap;
 debug_key_pressed := false;  // note: doesn't happen every frame, based on OS key repeat rate
 debug_key_callback: ();
 
-//input_captured_mouse := false;
-//input_captured_keyboard := false;
+input_captured_mouse := false;
+input_captured_keyboard := false;
 
 DebugKey :: () {
     if debug_key_callback {
@@ -80,26 +80,13 @@ process_input :: () {
     for event: events_this_frame {
         #if GET_RECT {
             getrect_handle_event(event);
+        }
 
-            // Wait.. why would I need this? It should be handled by getrect_captured_keyboard below?
-
-            //// If GetRect is going to handle the ESCAPE, don't forward it elsewhere.
-            //if GetRect.active_widget && event.type == .KEYBOARD && event.key_code == .ESCAPE {
-            //    // This causes the ESCAPE to not be handled properly by GetRect. Idk why I put this here originally,
-            //    // but let's leave it commented out for now.
-            //    //active_widget_deactivate_all();
-            //    continue;
-            //}
-
-            // Check if event should be ignored due to GetRect captures
-            getrect_captured_mouse := GetRect.occluder_under_the_cursor != null;
-            getrect_captured_keyboard := GetRect.active_widget != null;
-            if getrect_captured_mouse && is_mouse_event(event) {
-               continue;
-            }
-            if getrect_captured_keyboard && is_keyboard_event(event) {
-               continue;
-            }
+        if input_captured_mouse && is_mouse_event(event) {
+            continue;
+        }
+        if input_captured_keyboard && is_keyboard_event(event) {
+            continue;
         }
 
         // Try to handle the event via the keymap
@@ -116,6 +103,11 @@ process_input :: () {
             quit = true;
         }
     }
+
+    // occluded  = `occluder_under_the_cursor != null` // a.k.a. "is the mouse over some GetRect window"
+    // is_active = `active_widget != null`             // a.k.a. "are we statefully interacting e.g. with a text input in GetRect"
+    occluded, is_active := ui_per_frame_update(window, xx window_size.x, xx window_size.y, now);
+    input_captured_mouse, input_captured_keyboard = occluded, is_active;
 }
 
 #scope_file

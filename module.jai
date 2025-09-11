@@ -188,11 +188,6 @@ simpler_update :: () {
         }
     }
 
-    #if GET_RECT {
-        // IDK WHAT THESE MEANNN
-        occluded, is_active := ui_per_frame_update(window, xx window_size.x, xx window_size.y, now);
-    }
-
     if ticks_per_second && tick_number {
         tick_accum += frame_dt;
         // re-sync tick accumulator when there are big frame time spikes
