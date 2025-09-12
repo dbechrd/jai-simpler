@@ -146,8 +146,7 @@ simpler_deinit :: () {
 
 // NOTE: Make sure you register your keymap procedures first!
 init_keymap :: (filename: string) {
-    add_proc(*keymap, "DebugKey", DebugKey);
-    if !load_from_file(*keymap, "keymap", filename, false) {
+    if !load_from_file(*keybinds, "keymap", filename, false) {
         log_error("Failed to load keymap from file %\n", filename);
     }
 }
@@ -174,8 +173,6 @@ begin_frame :: () {
 
 simpler_update :: () {
     update_window_events();
-
-    debug_key_pressed = false;
     process_input();
 
     // NOTE: This is after process_input() because toggle_fullscreen() could generate a window_resize event.

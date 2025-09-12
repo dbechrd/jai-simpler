@@ -7,19 +7,10 @@ mouse_delta: Vector2;
 mouse_delta_inverted: Vector2;
 scroll_vel: Vector2;
 
-keymap: Keymap;
-debug_key_pressed := false;  // note: doesn't happen every frame, based on OS key repeat rate
-debug_key_callback: ();
+keybinds: Keymap_Set;
 
 input_captured_mouse := false;
 input_captured_keyboard := false;
-
-DebugKey :: () {
-    if debug_key_callback {
-        debug_key_callback();
-    }
-    debug_key_pressed = true;
-}
 
 register_key_proc :: (keymap: *Keymap, ident: Code) #expand {
     add_proc(keymap, #run get_identifier_name(ident), #insert ident);
@@ -85,12 +76,14 @@ process_input :: () {
         if input_captured_mouse && is_mouse_event(event) {
             continue;
         }
-        if input_captured_keyboard && is_keyboard_event(event) {
+        // note: always send key release events to keymap, to prevent stuck keys
+        // if (input_captured_mouse || input_captured_keyboard) && is_keyboard_event(event) && event.key_pressed {
+        if input_captured_keyboard && is_keyboard_event(event) && event.key_pressed {
             continue;
         }
 
         // Try to handle the event via the keymap
-        if keymap_handle_event(keymap, event) {
+        if handle_event(*keybinds, event) {
             continue;
         }
 
