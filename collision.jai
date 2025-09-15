@@ -11,7 +11,26 @@ mouse_overlaps_rect :: (x: float, y: float, w: float, h: float) -> bool {
     return point_overlaps_rect(p, x, y, w, h);
 }
 
+mouse_overlaps_rect :: (r: GetRect.Rect) -> bool {
+    return mouse_overlaps_rect(r.x, r.y, r.w, r.h);
+}
+
 rect_overlaps_rect :: (ax: float, ay: float, aw: float, ah: float,
                        bx: float, by: float, bw: float, bh: float) -> bool {
     return ax + aw > bx && ay + ah > by && bx + bw > ax && by + bh > ay;
+}
+
+rect_union :: (r0: Rect, r1: Rect) -> Rect {
+    x := min(r0.x, r1.x);
+    y := min(r0.y, r1.y);
+    w := max(r0.x + r0.w, r1.x + r1.w) - x;
+    h := max(r0.y + r0.h, r1.y + r1.h) - y;
+    r := Rect.{ x, y, w, h };
+    return r;
+}
+
+#scope_file
+
+#if GET_RECT {
+    using GetRect :: #import "GetRect_LeftHanded";
 }
