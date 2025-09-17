@@ -97,10 +97,12 @@ process_input :: () {
         }
     }
 
-    // occluded  = `occluder_under_the_cursor != null` // a.k.a. "is the mouse over some GetRect window"
-    // is_active = `active_widget != null`             // a.k.a. "are we statefully interacting e.g. with a text input in GetRect"
-    occluded, is_active := ui_per_frame_update(window, xx window_size.x, xx window_size.y, now);
-    input_captured_mouse, input_captured_keyboard = occluded, is_active;
+    #if GET_RECT {
+        // occluded  = `occluder_under_the_cursor != null` // a.k.a. "is the mouse over some GetRect window"
+        // is_active = `active_widget != null`             // a.k.a. "are we statefully interacting e.g. with a text input in GetRect"
+        occluded, is_active := ui_per_frame_update(window, xx window_size.x, xx window_size.y, now);
+        input_captured_mouse, input_captured_keyboard = occluded, is_active;
+    }
 }
 
 #scope_file
