@@ -1,52 +1,20 @@
-Font :: struct {
-    // YUCKKKKK Simp takes these as separate args for some reason!?
-    path: string;
-    file: string;
-    pixel_height: int;
-    font: *Dynamic_Font;
-}
+prepare_font_for_sdf :: (font: *Dynamic_Font, kern := false) {
+    if !font return;
 
-fonts: Bucket_Array(Font, 8);
-
-register_font :: (path: string, file: string, pixel_height: int, kern := false) -> *Font {
-    font: Font;
-    font.path = path;
-    font.file = file;
-    font.pixel_height = pixel_height;
-    font.font = get_font_at_size(path, file, pixel_height);
-    if !font.font {
-        return null;
-    }
     if kern {
-        // prepare_for_kerning(font.font);  // hmmm...
+        // prepare_for_kerning(font);  // hmmm...
     }
-    _, ptr := bucket_array_add(*fonts, font);
-
-    // HACK: Offset for SDF fonts. -9 works for all of them atm..
     #if SDF_FONTS {
+        // HACK: Offset for SDF fonts. -9 works for all of them atm..
         font.font.y_offset_for_my_latin_characters = -9;
     }
-    return ptr;
 }
 
-init_fonts :: () {
-    // for * fonts {
-    //     using it;
-    //     release_font(font);
-    //     font = get_font_at_size(path, file, pixel_height);
-    // }
-
+set_font_shaders :: () {
     #if SDF_FONTS {
         shader_text.gl_handle   = get_shader_program(SHADER_TEXT_SDF);
         shader_text.alpha_blend = true;
     }
-}
-
-deinit_fonts :: () {
-    for fonts {
-        release_font(it.font);
-    }
-    bucket_array_reset(*fonts);
 }
 
 // // NOTE: swap_buffers adds extra frames of delay to the loading times.. meh

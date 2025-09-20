@@ -124,8 +124,8 @@ simpler_init :: (title: string, requested_window_size: Vector2i) {
     }
 
     init_render(title, requested_window_size);
-    init_fonts();
     init_audio();
+    set_font_shaders();
 }
 
 simpler_deinit :: () {
@@ -133,7 +133,6 @@ simpler_deinit :: () {
         game_mode.deinit();
     }
     deinit_audio();
-    deinit_fonts();
     #if ASSET_WATCHER {
         asset_watcher_stop();
         deinit(*texture_by_filepath);
