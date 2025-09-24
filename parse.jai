@@ -17,7 +17,8 @@ expect_eof :: (handler: *Text_File_Handler) #expand {
 
 return_if :: (condition: bool, error: string) #expand {
     if condition {
-        `return false, error;
+        // note: xx 0 allows this to return false, null, 0, etc.
+        `return xx 0, error;
     }
 }
 
