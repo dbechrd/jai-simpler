@@ -76,9 +76,8 @@ process_input :: () {
         if input_captured_mouse && is_mouse_event(event) {
             continue;
         }
-        // note: always send key release events to keymap, to prevent stuck keys
-        // if (input_captured_mouse || input_captured_keyboard) && is_keyboard_event(event) && event.key_pressed {
         if input_captured_keyboard && is_keyboard_event(event) && event.key_pressed {
+            // note: don't continue on key release events, to prevent stuck keys
             continue;
         }
 

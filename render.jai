@@ -89,6 +89,12 @@ find_or_load_texture :: (filepath: string, srgb := false, build_mipmaps := false
 
 // NOTE: origin is bottom left, following the Simp convention
 draw_rect :: (x: float, y: float, w: float, h: float, color := Vector4.{1,1,1,1}, texture: *Texture = null, uv_tl := Vector2.{}, uv_br := Vector2.{1, 1}, outline_color := Black, outline_thickness := 0.0) {
+    if texture {
+        set_shader_for_images(texture);
+    } else {
+        set_shader_for_color(true);
+    }
+
     x0, y0, x1, y1 := x, y, x + w, y + h;
     p0 := Vector2.{ x  , y   };
     p1 := Vector2.{ x  , y+h };
@@ -98,11 +104,7 @@ draw_rect :: (x: float, y: float, w: float, h: float, color := Vector4.{1,1,1,1}
     uv1 := Vector2.{ uv_tl.x, uv_br.y };
     uv2 := uv_br;
     uv3 := Vector2.{ uv_br.x, uv_tl.y };
-    if texture {
-        set_shader_for_images(texture);
-    } else {
-        set_shader_for_color(true);
-    }
+
     immediate_quad(p0, p1, p2, p3, color, uv0, uv1, uv2, uv3);
     if outline_thickness {
         draw_rect_outline(x, y, w, h, outline_color, outline_thickness);
@@ -141,11 +143,12 @@ draw_rect_clamped_to_window :: (x: float, y: float, w: float, h: float, color :=
 }
 
 draw_rect_outline :: (x: float, y: float, w: float, h: float, color := Vector4.{1,1,1,1}, thickness: float = 1.0) {
+    set_shader_for_color(true);
+
     p0 := Vector2.{ x-thickness/2     , y-thickness/2     };  // tl
     p1 := Vector2.{ x+thickness/2 + w , y-thickness/2     };  // tr
     p2 := Vector2.{ x-thickness/2     , y+thickness/2 + h };  // bl
     p3 := Vector2.{ x+thickness/2 + w , y+thickness/2 + h };  // br
-    set_shader_for_color(true);
     immediate_line(p0-.{thickness/2, 0}, p1+.{thickness/2, 0}, thickness, color);  // top
     immediate_line(p2-.{thickness/2, 0}, p3+.{thickness/2, 0}, thickness, color);  // bottom
     immediate_line(p1, p3, thickness, color);  // right
@@ -153,6 +156,8 @@ draw_rect_outline :: (x: float, y: float, w: float, h: float, color := Vector4.{
 }
 
 draw_circle :: (center: Vector2, radius: float, color: Vector4, segments := 16, pct_visible := 1.0) {
+    set_shader_for_color(true);
+
     // draw manual triangle fan clockwise from 12 o'clock. triangle vertices counter-clockwise from the center.
     delta := 2*PI / segments;
     theta := -PI/2;  // 12 o'clock

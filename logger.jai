@@ -62,8 +62,7 @@ simpler_build_log_message :: (message: string, data: *void, info: Log_Info) -> s
 };
 
 simpler_logger :: (message: string, data: *void, info: Log_Info) {
-    assert(log_file.handle != null);
-
+    if !log_file.handle then return;
     if !message then return;
 
     if info.common_flags & .VERY_VERBOSE_ONLY && context.log_level < .VERY_VERBOSE {

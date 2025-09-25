@@ -91,14 +91,14 @@ ease_out_bounce :: (t: float) -> float {
     }
 }
 
-easing_update :: () {
+update_easing_debug :: () {
     t += xx frame_dt;
     if t >= 1.2 {  // note: 1.2 to give a pause before resetting
         t = 0;
     }
 }
 
-easing_draw :: () {
+draw_easing_debug :: () {
     top_left := Vector2.{100, 300};
     cursor := top_left;
     for ease_func: easing_funcs {
