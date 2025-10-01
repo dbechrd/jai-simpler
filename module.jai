@@ -101,8 +101,7 @@ switch_game_mode :: (mode: *GameMode) {
 }
 
 simpler_init :: (title: string, requested_window_size: Vector2i) {
-    // HACK: For pong swapper thing
-    // if window return;
+    auto_release_temp();
 
     seconds_since_init();  // force timer init
 
