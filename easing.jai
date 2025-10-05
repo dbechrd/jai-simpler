@@ -92,6 +92,8 @@ ease_out_bounce :: (t: float) -> float {
 }
 
 update_easing_debug :: () {
+    using easing_debug_state;
+
     t += xx frame_dt;
     if t >= 1.2 {  // note: 1.2 to give a pause before resetting
         t = 0;
@@ -99,6 +101,8 @@ update_easing_debug :: () {
 }
 
 draw_easing_debug :: () {
+    using easing_debug_state;
+
     top_left := Vector2.{100, 300};
     cursor := top_left;
     for ease_func: easing_funcs {
@@ -138,9 +142,12 @@ draw_easing_debug :: () {
 
 #scope_file
 
-t: float;
-bar_size :: Vector2.{50, 200};
-nub_size :: Vector2.{50, 20};
+Easing_Debug_State :: struct {
+    t: float;
+    bar_size :: Vector2.{50, 200};
+    nub_size :: Vector2.{50, 20};
+}
+easing_debug_state: Easing_Debug_State;
 
 easing_funcs :: type_of(ease_in_quad).[
     ease_in_quad,

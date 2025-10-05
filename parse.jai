@@ -50,13 +50,13 @@ expect_string :: (s: *string, desc: string) -> value: string #expand {
     return value;
 }
 
-expect_string_value :: (s: *string, value: string, desc: string) #expand {
-    assert(xx value);
+expect_string_literal :: (s: *string, literal: string, desc: string) #expand {
+    assert(xx literal);
 
     _s := s.*;
-    if _s.count >= value.count {
-        for value {
-            return_if(!_s || _s[0] != it, "Expected '%' (%), found '%'.", value, desc, s);
+    if _s.count >= literal.count {
+        for literal {
+            return_if(!_s || _s[0] != it, "Expected '%' (%), found '%'.", literal, desc, s);
             advance(*_s, 1);
         }
     }
