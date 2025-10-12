@@ -65,7 +65,7 @@ find_or_load_texture :: (filepath: string, srgb := false, build_mipmaps := false
     texture: *Texture;
 
     // Find/allocate texture
-    found, locator := table_find_new(*texture_by_filepath, filepath);
+    found, locator := table_find(*texture_by_filepath, filepath);
     if found {
         texture = bucket_array_find_pointer(*texture_storage, locator);
     } else {
