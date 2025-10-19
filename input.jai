@@ -42,23 +42,25 @@ is_keyboard_event :: (event: Event) -> bool {
 
 process_input :: () {
     window_focused = input_application_has_focus;
-    x, y := get_mouse_pointer_position();
-    mouse_in_bounds := window_focused && x >= 0 && x < window_size.x && y >= 0 && y < window_size.y;
+    x, y := get_mouse_pointer_position(window, !LEFT_HANDED);
+    //x = clamp(x, 0, window_size.x-1);
+    //y = clamp(y, 0, window_size.y-1);
+    // mouse_in_bounds := window_focused && x >= 0 && x < window_size.x && y >= 0 && y < window_size.y;
 
     prev_mouse := mouse_position;
     prev_mouse_inv := mouse_position_inverted;
 
-    if mouse_in_bounds {
+    // if mouse_in_bounds {
         mouse_position = .{ xx x, xx y };
         mouse_position_inverted = .{ xx x, xx (window_size.y - y) };
         mouse_delta = mouse_position - prev_mouse;
         mouse_delta_inverted = mouse_delta_inverted - prev_mouse_inv;
-    } else {
-        mouse_position = OUT_OF_BOUNDS_F;
-        mouse_position_inverted = OUT_OF_BOUNDS_F;
-        mouse_delta = .{};
-        mouse_delta_inverted = .{};
-    }
+    // } else {
+    //     mouse_position = OUT_OF_BOUNDS_F;
+    //     mouse_position_inverted = OUT_OF_BOUNDS_F;
+    //     mouse_delta = .{};
+    //     mouse_delta_inverted = .{};
+    // }
 
     scroll_vel = .{};
     factor := mouse_delta_z / 120.0;

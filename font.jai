@@ -26,6 +26,16 @@ set_font_shaders :: () {
 //     swap_buffers(window, vsync);
 // }
 
+// x,y is top left of text, instead of baseline
+draw_text_tl :: (font: *Dynamic_Font, x: s64, y: s64, text: string, color := Vector4.{1,1,1,1}, effects: Font_Effects = 0) -> width: s64 {
+    return draw_text(font, x, y + font.character_height + font.typical_descender, text, color, effects);
+}
+
+// x,y is top left of text, instead of baseline
+draw_prepared_text_tl :: (font: *Dynamic_Font, x: s64, y: s64, color := Vector4.{1,1,1,1}, effects: Font_Effects = 0) {
+    draw_prepared_text(font, x, y + font.character_height + font.typical_descender, color, effects);
+}
+
 draw_text_shadowed :: (font: *Dynamic_Font, x: s64, y: s64, text: string, color := Vector4.{0.95, 0.95, 0.95, 1},
                        shadow_color := Vector4.{0, 0, 0, -1}, effects: Font_Effects = 0) -> width: s64
 {
@@ -52,17 +62,6 @@ draw_prepared_text_shadowed :: (font: *Dynamic_Font, x: s64, y: s64, color := Ve
         // draw_prepared_text(font, x + 2, y + y_offset * 2, shadow, effects);  // NOTE: To get higher offset, draw both, looks prettier?
     }
     draw_prepared_text(font, x, y, color, effects);
-}
-
-
-// x,y is top left of text, instead of baseline
-draw_text_tl :: (font: *Dynamic_Font, x: s64, y: s64, text: string, color := Vector4.{1,1,1,1}, effects: Font_Effects = 0) -> width: s64 {
-    return draw_text(font, x, y + font.character_height + font.typical_descender, text, color, effects);
-}
-
-// x,y is top left of text, instead of baseline
-draw_prepared_text_tl :: (font: *Dynamic_Font, x: s64, y: s64, color := Vector4.{1,1,1,1}, effects: Font_Effects = 0) {
-    draw_prepared_text(font, x, y + font.character_height + font.typical_descender, color, effects);
 }
 
 // x,y is top left of text, instead of baseline
