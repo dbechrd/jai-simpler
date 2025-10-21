@@ -4,7 +4,8 @@ simpler_build_log_message :: (message: string, data: *void, info: Log_Info) -> s
     builder: String_Builder;
 
     // timestamp
-    print_to_builder(*builder, "[%s]", seconds_since_init());
+    timestamp := seconds_since_init();
+    print_to_builder(*builder, "[%s]", timestamp);
 
     // log the source of message
     #if LOG_SOURCES {

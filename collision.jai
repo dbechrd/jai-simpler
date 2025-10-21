@@ -3,6 +3,8 @@ point_overlaps_rect :: (p: Vector2, x: float, y: float, w: float, h: float) -> b
 }
 
 mouse_overlaps_rect :: (x: float, y: float, w: float, h: float) -> bool {
+    if !window_focused return false;
+
     #if LEFT_HANDED {
         p := Vector2.{ mouse_position.x, mouse_position.y };
     } else {
@@ -18,6 +20,7 @@ rect_overlaps_rect :: (ax: float, ay: float, aw: float, ah: float,
 
 #if GET_RECT {
     mouse_overlaps_rect :: (r: GetRect.Rect) -> bool {
+        if !window_focused return false;
         return mouse_overlaps_rect(r.x, r.y, r.w, r.h);
     }
 
