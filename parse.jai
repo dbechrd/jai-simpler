@@ -63,6 +63,24 @@ expect_string_literal :: (s: *string, literal: string, desc: string) #expand {
     s.* = _s;
 }
 
+expect_2d_array :: (handler: *Text_File_Handler, $desc: string, array: [] $T, dims: Vector2i, min := S64_MIN, max := S64_MAX, $validator := #code it.* = value) #expand {
+    line := expect_line(handler, desc);
+    for * array {
+        value := expect_int(*line, min, max, #run tprint("% value", desc));
+        #insert,scope() validator;
+
+        // last column
+        if it_index % dims.x == dims.x-1 {
+            expect_eol();
+            // all rows but last
+            if it_index < (dims.x * dims.y)-1 {
+                line = expect_line(handler, desc);
+            }
+        }
+    }
+    expect_eol();
+}
+
 #scope_file
 
 #import "Text_File_Handler";
