@@ -8,7 +8,8 @@
     SDF_FONTS := true,            // replace the font shader with an SDF shader (see note below)
     LOG_SOURCES := true,          // print filenames or inferred sources in the log file for each line
     INFER_LOG_SOURCES := true,    // do some magic to figure out which module a log line came from (if LOG_SOURCES=true)
-    ONE_TICK_PER_FRAME := false   // for debugging, don't run many ticks at once when accumulator is high
+    ONE_TICK_PER_FRAME := false,  // for debugging, don't run many ticks at once when accumulator is high
+    GAMEPAD_SUPPORT := false      // enable this to init/query gamepad input
 );
 
 /*
@@ -122,9 +123,16 @@ simpler_init :: (title: string, requested_window_size: Vector2i) {
         log("Working Directory: %\n", path);
     }
 
+    #if GAMEPAD_SUPPORT {
+        init_gamepad();
+        if gamepad.connected {
+            gamepad.generate_events = true;
+        } else {
+            log("Failed to find a supported gampad.");
+        }
+    }
     init_render(title, requested_window_size);
     init_audio();
-    set_font_shaders();
 }
 
 simpler_deinit :: () {
@@ -171,6 +179,9 @@ begin_frame :: () {
 
 simpler_update :: () {
     update_window_events();
+    #if GAMEPAD_SUPPORT {
+        update_gamepad();
+    }
     process_input();
 
     // NOTE: This is after process_input() because toggle_fullscreen() could generate a window_resize event.
@@ -258,4 +269,7 @@ simpler_game_loop :: () {
 #import "File_Watcher";
 #if GET_RECT {
     using GetRect :: #import "GetRect_LeftHanded";
+}
+#if GAMEPAD_SUPPORT {
+    #import "Gamepad";
 }

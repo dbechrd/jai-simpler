@@ -4,7 +4,9 @@ make_random_seed :: () -> u64 {
         #import "Machine_X64";
         for 0..100 {  // upper bound, to avoid infinite loops if something funny is happening
             success, value := rdseed();
-            if success return value;
+            if success {
+                return value;
+            }
         }
     }
 

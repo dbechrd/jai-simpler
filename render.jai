@@ -27,6 +27,8 @@ init_render :: (title: string, requested_window_size: Vector2i) {
 
     log("--- Render Info ---\n");
     log("window_size: % x %\n", window_size.x, window_size.y);
+
+    set_font_shaders();
 }
 
 
@@ -87,7 +89,6 @@ find_or_load_texture :: (filepath: string, srgb := false, build_mipmaps := false
 //    draw_rect(x, y, w, h, null, color, outline_color=outline_color, outline_thickness=outline_thickness);
 //}
 
-// NOTE: origin is bottom left, following the Simp convention
 draw_rect :: (x: float, y: float, w: float, h: float, color := Vector4.{1,1,1,1}, texture: *Texture = null, uv_tl := Vector2.{}, uv_br := Vector2.{1, 1}, outline_color := Black, outline_thickness := 0.0) {
     if texture {
         set_shader_for_images(texture);
