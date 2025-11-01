@@ -156,7 +156,7 @@ draw_rect_outline :: (x: float, y: float, w: float, h: float, color := Vector4.{
     immediate_line(p2, p0, thickness, color);  // left
 }
 
-draw_circle :: (center: Vector2, radius: float, color: Vector4, segments := 16, pct_visible := 1.0) {
+draw_circle :: (center: Vector2, radius: float, color := White, segments := 16, pct_visible := 1.0) {
     set_shader_for_color(true);
 
     // draw manual triangle fan clockwise from 12 o'clock. triangle vertices counter-clockwise from the center.

@@ -31,12 +31,11 @@ expect_int :: (s: *string, desc: string, base := 10, $T := int) -> value: T #exp
 }
 
 // note: both bounds inclusive
-expect_int :: (s: *string, min: int, max: int, desc: string, base := 10, $T := int, zero_allowed := false) -> value: T #expand {
+expect_int :: (s: *string, min: int, max: int, desc: string, base := 10, $T := int) -> value: T #expand {
     value:, success:, s.* = string_to_int(s.*, base, T);
     return_if(!success, "Expected integer (%) in range % to %.", desc, min, max);
 
-    zero_okay := zero_allowed && value == 0;
-    in_range := (value >= min && value <= max) || zero_okay;
+    in_range := value >= min && value <= max;
     return_if(!in_range, "Expected integer (%) in range % to %. Found '%'.", desc, min, max, value);
 
     s.* = eat_spaces(s.*);
