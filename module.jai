@@ -220,9 +220,12 @@ simpler_update :: () {
 }
 
 simpler_draw :: () {
-    t_draw := seconds_since_init();
-    game_mode.draw();
-    timings_buf[Timing.Draw] = seconds_since_init() - t_draw;
+    // perf, if causes side effects, consider removing the minimized check
+    if !window_minimized {
+        t_draw := seconds_since_init();
+        game_mode.draw();
+        timings_buf[Timing.Draw] = seconds_since_init() - t_draw;
+    }
 }
 
 end_frame :: () {
@@ -236,7 +239,11 @@ end_frame :: () {
         timings_buf[Timing.Asset_Watcher] = seconds_since_init() - t_asset_watcher;
     }
 
-    swap_buffers(window, vsync);
+    // HACK: For some reason minimizing the window causes SEVERE fps loss *unless* you don't call swap_buffers
+    // while it's minimized. This makes no sense.. Ugh.
+    if !window_minimized {
+        swap_buffers(window, vsync);
+    }
 
     timings = timings_buf;
     ts := context.temporary_storage;
