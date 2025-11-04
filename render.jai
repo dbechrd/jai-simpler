@@ -5,7 +5,7 @@ window_center: Vector2;
 window_info: Saved_Window_Info;
 window_resizes: [] Window_Resize_Record;
 
-vsync: bool = true;
+vsync: bool;
 fullscreen: bool;
 window_focused: bool;
 
@@ -22,11 +22,16 @@ init_render :: (title: string, requested_window_size: Vector2i) {
     window = create_window(requested_window_size.x, requested_window_size.y, title);
     set_render_target(window, ifx LEFT_HANDED then .LEFT_HANDED else .RIGHT_HANDED);
 
+    #if OS == .WINDOWS {
+        #import "GL";
+        vsync = xx wglGetSwapIntervalEXT();
+    }
+
     window_size.x, window_size.y = get_render_dimensions(window);
     window_center = .{ xx (window_size.x / 2), xx (window_size.y / 2) };
 
     log("--- Render Info ---\n");
-    log("window_size: % x %\n", window_size.x, window_size.y);
+    log("window_size: % x % vsync=%\n", window_size.x, window_size.y, vsync);
 
     set_font_shaders();
 }
@@ -41,18 +46,18 @@ clear_render_target :: (color: Vector4) {
     );
 }
 
-toggle_fullscreen :: () {
-    fullscreen = !fullscreen;
+set_fullscreen :: (desire_fullscreen: bool) {
     #if OS == .WINDOWS {
-        toggle_fullscreen(window, fullscreen, *window_info);
+        toggle_fullscreen(window, desire_fullscreen, *window_info);
+        fullscreen = desire_fullscreen;
     }
 }
 
-toggle_vsync :: () {
-    vsync = !vsync;
+set_vsync :: (desire_vsync: bool) {
     #if OS == .WINDOWS {
         #import "GL";
-        wglSwapIntervalEXT(xx vsync);
+        wglSwapIntervalEXT(xx desire_vsync);
+        vsync = desire_vsync;
     }
 }
 

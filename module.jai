@@ -221,11 +221,11 @@ simpler_update :: () {
 
 simpler_draw :: () {
     // perf, if causes side effects, consider removing the minimized check
-    if !window_minimized {
+    // if !window_minimized {
         t_draw := seconds_since_init();
         game_mode.draw();
         timings_buf[Timing.Draw] = seconds_since_init() - t_draw;
-    }
+    // }
 }
 
 end_frame :: () {
@@ -244,8 +244,18 @@ end_frame :: () {
     // Update: Removing the icon from the .exe also resolves this bug. WHYY?
     // Update: Using hIconSm instead of hIcon in Window_Creation is another way to "fix" it. No known side effects.
     //         For now, I'll leave this code here, cus it's kind of nice to save the CPU from burning up.
-    if !window_minimized {
+    // if !window_minimized {
         swap_buffers(window, vsync);
+    // }
+
+    // HACK: For some reason the app starts out at 7% CPU utilization with v-sync enabled, but if you toggle it twice, it goes
+    // down to 0%. So uhh.. just manually toggle it twice here in the most ridiculously stupid way possible. I have no idea
+    // what the hell is going on with computers these days.
+    if frame_number == 1 {
+        set_vsync(!vsync);
+    }
+    if frame_number == 250 {
+        set_vsync(!vsync);
     }
 
     timings = timings_buf;
