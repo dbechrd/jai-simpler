@@ -241,6 +241,9 @@ end_frame :: () {
 
     // HACK: For some reason minimizing the window causes SEVERE fps loss *unless* you don't call swap_buffers
     // while it's minimized. This makes no sense.. Ugh.
+    // Update: Removing the icon from the .exe also resolves this bug. WHYY?
+    // Update: Using hIconSm instead of hIcon in Window_Creation is another way to "fix" it. No known side effects.
+    //         For now, I'll leave this code here, cus it's kind of nice to save the CPU from burning up.
     if !window_minimized {
         swap_buffers(window, vsync);
     }
