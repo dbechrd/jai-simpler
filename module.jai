@@ -124,6 +124,7 @@ simpler_init :: (title: string, requested_window_size: Vector2i) {
     }
 
     #if GAMEPAD_SUPPORT {
+        log("Init gamepad");
         init_gamepad();
         if gamepad.connected {
             gamepad.generate_events = true;
@@ -131,7 +132,9 @@ simpler_init :: (title: string, requested_window_size: Vector2i) {
             log("Failed to find a supported gampad.");
         }
     }
+    log("Init render");
     init_render(title, requested_window_size);
+    log("Init audio");
     init_audio();
 }
 
