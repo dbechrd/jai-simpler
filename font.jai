@@ -6,7 +6,7 @@ prepare_font_for_sdf :: (font: *Dynamic_Font, kern := false) {
     }
     #if SDF_FONTS {
         // HACK: Offset for SDF fonts. -9 works for all of them atm..
-        font.font.y_offset_for_my_latin_characters = -9;
+        font.y_offset_for_my_latin_characters = -9;
     }
 }
 
@@ -131,7 +131,7 @@ void main () {
         // Debug: Show smoothing as red/green gradient
         // col.xyz = mix(vec3(1,0,0), vec3(0,1,0), alpha);
     }
-    color = col;
+    color = vec4(col.xyz, col.a * iterated_color.a);
     // color = vec4(vec3(signed_dist), 1);
 }
 #endif // FRAGMENT_SHADER
