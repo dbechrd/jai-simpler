@@ -92,14 +92,14 @@ simpler_print_style :: () {
     context.print_style.default_format_float.zero_removal = .NO;
 }
 
-init_logger :: () {
+init_logger :: (logger: Logger) {
     simpler_print_style();
 
     file, success := file_open(log_file_path, for_writing=true, keep_existing_content=false);
     if !success return;
     log_file = file;
 
-    context.logger = simpler_logger;
+    context.logger = logger;
     log_preamble();
 }
 

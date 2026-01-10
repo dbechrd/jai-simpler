@@ -101,7 +101,7 @@ switch_game_mode :: (mode: *GameMode) {
     requested_game_mode = mode;
 }
 
-simpler_init :: (title: string, requested_window_size: Vector2i) {
+simpler_init :: (title: string, requested_window_size: Vector2i, logger := simpler_logger) {
     auto_release_temp();
 
     seconds_since_init();  // force timer init
@@ -112,7 +112,7 @@ simpler_init :: (title: string, requested_window_size: Vector2i) {
         Windows.timeBeginPeriod(1);
     }
 
-    init_logger();
+    init_logger(logger);
 
     {
         #import "String";  // For path_strip_filename. @Cleanup.

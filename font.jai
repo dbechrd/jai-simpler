@@ -54,12 +54,14 @@ draw_prepared_text_shadowed :: (font: *Dynamic_Font, x: s64, y: s64, color := Ve
             shadow = WHITE;
         }
     }
-    if shadow.w {
-        y_offset := ifx context.simp.coordinate_system == .LEFT_HANDED then 1 else -1;
-        if font.character_height > 24 y_offset *= 2;
-        shadow.w = color.w;
-        draw_prepared_text(font, x + 1, y + y_offset, shadow, effects);
-        // draw_prepared_text(font, x + 2, y + y_offset * 2, shadow, effects);  // NOTE: To get higher offset, draw both, looks prettier?
+    #if !SDF_FONTS {
+        if shadow.w {
+            y_offset := ifx context.simp.coordinate_system == .LEFT_HANDED then 1 else -1;
+            if font.character_height > 24 y_offset *= 2;
+            shadow.w = color.w;
+            draw_prepared_text(font, x + 1, y + y_offset, shadow, effects);
+            // draw_prepared_text(font, x + 2, y + y_offset * 2, shadow, effects);  // NOTE: To get higher offset, draw both, looks prettier?
+        }
     }
     draw_prepared_text(font, x, y, color, effects);
 }
@@ -105,9 +107,9 @@ uniform sampler2D text_sampler;
 uniform vec4 text_color;
 
 void main () {
-    float inner_smooth = 0.47;  // where the smoothing between glyph color and outline begins
-    float inner_radius = 0.55;  // where the outline starts
-    float outer_radius = 0.60;  // where the outline ends
+    float inner_smooth = 0.48;  // where the smoothing between glyph color and outline begins
+    float inner_radius = 0.54;  // where the outline starts
+    float outer_radius = 0.65;  // where the outline ends
 
     vec4 col = iterated_color;
     float texel = texture(text_sampler, TextureCoords).a;
