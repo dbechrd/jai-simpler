@@ -101,7 +101,6 @@ draw_rect :: (x: float, y: float, w: float, h: float, color := Vector4.{1,1,1,1}
         set_shader_for_color(true);
     }
 
-    x0, y0, x1, y1 := x, y, x + w, y + h;
     p0 := Vector2.{ x  , y   };
     p1 := Vector2.{ x  , y+h };
     p2 := Vector2.{ x+w, y+h };
@@ -159,6 +158,47 @@ draw_rect_outline :: (x: float, y: float, w: float, h: float, color := Vector4.{
     immediate_line(p2-.{thickness/2, 0}, p3+.{thickness/2, 0}, thickness, color);  // bottom
     immediate_line(p1, p3, thickness, color);  // right
     immediate_line(p2, p0, thickness, color);  // left
+}
+
+draw_rect_npatch :: (
+    x: float, y: float, w: float, h: float,
+    left_border: float, top_border: float, right_border: float, bottom_border: float,
+    texture: *Texture, color := Vector4.{1,1,1,1}, uv_tl := Vector2.{}, uv_br := Vector2.{1, 1}
+) {
+    // Null-safe so that we still drawing something when a texture fails to load
+    if !texture {
+        set_shader_for_color(true);
+        draw_rect(x, y, w, h, color);
+        return;
+    }
+
+    set_shader_for_images(texture);
+
+    cols := float.[x, x+left_border, x+w-right_border,  x+w];
+    rows := float.[y, y+top_border,  y+h-bottom_border, y+h];
+
+    uv_w := uv_br.x - uv_tl.x;
+    uv_h := uv_br.y - uv_tl.y;
+    uv_cols := float.[uv_tl.x, clamp(uv_tl.x + left_border/texture.width , uv_tl.x, uv_br.x), clamp(uv_br.x-right_border /texture.width , uv_tl.x, uv_br.x), uv_br.x];
+    uv_rows := float.[uv_tl.y, clamp(uv_tl.y + top_border /texture.height, uv_tl.y, uv_br.y), clamp(uv_br.y-bottom_border/texture.height, uv_tl.y, uv_br.y), uv_br.y];
+
+    // colors :: Vector4.[Red, Green, Yellow, Blue, Orange, Purple, Pink, Maroon, Lime];
+
+    for i: 0..2 {
+        for j: 0..2 {
+            tl := Vector2.{ cols[j  ], rows[i  ] };
+            bl := Vector2.{ cols[j  ], rows[i+1] };
+            br := Vector2.{ cols[j+1], rows[i+1] };
+            tr := Vector2.{ cols[j+1], rows[i  ] };
+            tl_uv := Vector2.{ uv_cols[j  ], uv_rows[i  ] };
+            bl_uv := Vector2.{ uv_cols[j  ], uv_rows[i+1] };
+            br_uv := Vector2.{ uv_cols[j+1], uv_rows[i+1] };
+            tr_uv := Vector2.{ uv_cols[j+1], uv_rows[i  ] };
+
+            // color := colors[i*3 + j];
+            immediate_quad(tl, bl, br, tr, color, tl_uv, bl_uv, br_uv, tr_uv);
+        }
+    }
 }
 
 draw_circle :: (center: Vector2, radius: float, color := White, segments := 16, pct_visible := 1.0) {
