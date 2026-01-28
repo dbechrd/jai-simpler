@@ -94,11 +94,13 @@ find_or_load_texture :: (filepath: string, srgb := false, build_mipmaps := false
 //    draw_rect(x, y, w, h, null, color, outline_color=outline_color, outline_thickness=outline_thickness);
 //}
 
-draw_rect :: (x: float, y: float, w: float, h: float, color := Vector4.{1,1,1,1}, texture: *Texture = null, uv_tl := Vector2.{}, uv_br := Vector2.{1, 1}, outline_color := Black, outline_thickness := 0.0) {
-    if texture {
-        set_shader_for_images(texture);
-    } else {
-        set_shader_for_color(true);
+draw_rect :: (x: float, y: float, w: float, h: float, color := Vector4.{1,1,1,1}, texture: *Texture = null, uv_tl := Vector2.{}, uv_br := Vector2.{1, 1}, outline_color := Black, outline_thickness := 0.0, $set_shader := true) {
+    #if set_shader {
+        if texture {
+            set_shader_for_images(texture);
+        } else {
+            set_shader_for_color(true);
+        }
     }
 
     p0 := Vector2.{ x  , y   };
@@ -147,8 +149,10 @@ draw_rect_clamped_to_window :: (x: float, y: float, w: float, h: float, color :=
     return clamp_offset;
 }
 
-draw_rect_outline :: (x: float, y: float, w: float, h: float, color := Vector4.{1,1,1,1}, thickness: float = 1.0) {
-    set_shader_for_color(true);
+draw_rect_outline :: (x: float, y: float, w: float, h: float, color := Vector4.{1,1,1,1}, thickness: float = 1.0, $set_shader := true) {
+    #if set_shader {
+        set_shader_for_color(true);
+    }
 
     p0 := Vector2.{ x-thickness/2     , y-thickness/2     };  // tl
     p1 := Vector2.{ x+thickness/2 + w , y-thickness/2     };  // tr
@@ -160,19 +164,28 @@ draw_rect_outline :: (x: float, y: float, w: float, h: float, color := Vector4.{
     immediate_line(p2, p0, thickness, color);  // left
 }
 
+// todo: 1x3 and 3x1 mode, e.g. by having left_border/right_border 0 for vertical, use $constants to remove extra draw calls at compile time
+// or.. detect degenerate quads and `continue` the loop (branching.. :/)
+// or.. just let the degenerate quads "draw" and it's fine?
 draw_rect_npatch :: (
     x: float, y: float, w: float, h: float,
     left_border: float, top_border: float, right_border: float, bottom_border: float,
-    texture: *Texture, color := Vector4.{1,1,1,1}, uv_tl := Vector2.{}, uv_br := Vector2.{1, 1}
+    texture: *Texture, color := Vector4.{1,1,1,1}, uv_tl := Vector2.{}, uv_br := Vector2.{1, 1},
+    $set_shader := true
 ) {
-    // Null-safe so that we still drawing something when a texture fails to load
+    #if set_shader {
+        if texture {
+            set_shader_for_images(texture);
+        } else {
+            set_shader_for_color(true);
+        }
+    }
+
+    // Null-safe so that we still draw something when a texture fails to load
     if !texture {
-        set_shader_for_color(true);
         draw_rect(x, y, w, h, color);
         return;
     }
-
-    set_shader_for_images(texture);
 
     cols := float.[x, x+left_border, x+w-right_border,  x+w];
     rows := float.[y, y+top_border,  y+h-bottom_border, y+h];
@@ -201,8 +214,10 @@ draw_rect_npatch :: (
     }
 }
 
-draw_circle :: (center: Vector2, radius: float, color := White, segments := 16, pct_visible := 1.0) {
-    set_shader_for_color(true);
+draw_circle :: (center: Vector2, radius: float, color := White, segments := 16, pct_visible := 1.0, $set_shader := true) {
+    #if set_shader {
+        set_shader_for_color(true);
+    }
 
     // draw manual triangle fan clockwise from 12 o'clock. triangle vertices counter-clockwise from the center.
     delta := 2*PI / segments;
