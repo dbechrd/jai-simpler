@@ -16,7 +16,7 @@ asset_watcher_update :: () {
 }
 
 asset_watcher_stop :: () {
-    deinit(*asset_watcher);
+    deinit(asset_watcher);
 }
 
 #scope_file
