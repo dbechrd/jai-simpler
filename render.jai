@@ -9,9 +9,12 @@ vsync: bool;
 fullscreen: bool;
 window_focused: bool;
 
-// note: the Table could just store *Texture since Bucket_Array is stable.. hmm...
+// Note: The Table could just store *Texture since Bucket_Array is stable, but
+// storing the Locator allows us to unload textures if we want to support that
+// later (because it tells you which Bucket_Array slot to remove without
+// iterating the whole thing).
 texture_storage: Bucket_Array(Texture, 64);
-texture_by_filepath: Table(string, Bucket_Locator);  // texture filepath -> texture_storage index
+texture_by_filepath: Table(string, Bucket_Locator);
 
 init_render :: (title: string, requested_window_size: Vector2i) {
     #if ASSET_WATCHER {
@@ -35,7 +38,6 @@ init_render :: (title: string, requested_window_size: Vector2i) {
 
     set_font_shaders();
 }
-
 
 clear_render_target :: (color: Vector4) {
     clear_render_target(
@@ -69,9 +71,13 @@ set_vsync :: (desire_vsync: bool) {
 // }
 
 find_or_load_texture :: (filepath: string, srgb := false, build_mipmaps := false, force_reload := false) -> texture: *Texture {
-    texture: *Texture;
+    log("Loading texture %", filepath);
+
+    //caps, name := get_capabilities(context.allocator);
+    //assert(caps & .FREE > 0, "This texture loader will waste a lot of memory if the allocator provided does not support free.");
 
     // Find/allocate texture
+    texture: *Texture;
     found, locator := table_find(*texture_by_filepath, filepath);
     if found {
         texture = bucket_array_find_pointer(*texture_storage, locator);
