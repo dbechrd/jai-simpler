@@ -164,10 +164,10 @@ draw_rect_outline :: (x: float, y: float, w: float, h: float, color := Vector4.{
     p1 := Vector2.{ x+thickness/2 + w , y-thickness/2     };  // tr
     p2 := Vector2.{ x-thickness/2     , y+thickness/2 + h };  // bl
     p3 := Vector2.{ x+thickness/2 + w , y+thickness/2 + h };  // br
-    immediate_line(p0-.{thickness/2, 0}, p1+.{thickness/2, 0}, thickness, color);  // top
-    immediate_line(p2-.{thickness/2, 0}, p3+.{thickness/2, 0}, thickness, color);  // bottom
-    immediate_line(p1, p3, thickness, color);  // right
-    immediate_line(p2, p0, thickness, color);  // left
+    immediate_line(p0-.{thickness/2, 0}, p1+.{thickness/2, 0}, color, thickness);  // top
+    immediate_line(p2-.{thickness/2, 0}, p3+.{thickness/2, 0}, color, thickness);  // bottom
+    immediate_line(p1, p3, color, thickness);  // right
+    immediate_line(p2, p0, color, thickness);  // left
 }
 
 // todo: 1x3 and 3x1 mode, e.g. by having left_border/right_border 0 for vertical, use $constants to remove extra draw calls at compile time
