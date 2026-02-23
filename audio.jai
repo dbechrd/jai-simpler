@@ -32,8 +32,15 @@ update_audio :: () {
     Sound.update();
 }
 
+sound_duration_seconds :: (sound_data: *Sound_Data) -> float {
+    if !sound_data return 0;
+
+    duration := sound_data.nsamples_times_nchannels.(float) / sound_data.nchannels / sound_data.sampling_rate;
+    return duration;
+}
+
 // note: perturb flag ignored when looping, because there's no easy way to vary it per loop iteration right now
-play_sound :: (sound_data: *Sound_Data, category := Sound_Category.GENERAL_SFX, volume := 1.0, perturb := 0.0, loop := false) {
+play_sound :: (sound_data: *Sound_Data, category := Sound_Category.GENERAL_SFX, volume := 1.0, perturb := 0.0, rate_scale := 1.0, loop := false) {
     stream := make_stream(sound_data, category);
     if sound_data.type == .OGG_COMPRESSED {
         // HACK: If an .ogg isn't big enough to finish loading "initial pages", we need to disable the wait.
@@ -41,18 +48,16 @@ play_sound :: (sound_data: *Sound_Data, category := Sound_Category.GENERAL_SFX, 
     }
 
     stream.user_volume_scale = volume;
-    if loop {
-        set_repeating(stream, loop);
-    } else if perturb {
-        // stream.user_volume_scale = random_get_within_range(0.5,  1);
-        stream.rate_scale = random_get_within_range(1.0 - perturb, 1.0 + perturb);
-    }
+    // stream.user_volume_scale = random_get_within_range(0.5,  1);
+    stream.rate_scale = rate_scale * random_get_within_range(1.0 - perturb, 1.0 + perturb);
+    if loop then set_repeating(stream, true);
+
     start_playing(stream);
 }
 
-play_sound_random :: (sound_data: [] Sound_Data, category := Sound_Category.GENERAL_SFX, volume := 1.0, perturb := 0.0, loop := false) {
+play_sound_random :: (sound_data: [] Sound_Data, category := Sound_Category.GENERAL_SFX, volume := 1.0, perturb := 0.0, rate_scale := 1.0, loop := false) {
     pick_sound := *sound_data[random_get_within_bound(xx sound_data.count)];
-    play_sound(pick_sound, category=category, volume=volume, perturb=perturb, loop=loop);
+    play_sound(pick_sound, category=category, volume=volume, perturb=perturb, rate_scale=rate_scale, loop=loop);
 }
 
 // Example usage:
