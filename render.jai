@@ -96,6 +96,25 @@ find_or_load_texture :: (filepath: string, srgb := false, build_mipmaps := false
     return texture;
 }
 
+generate_one_pixel_texture :: (texture: *Texture, color: Vector3) {
+    r := (clamp(color.x, 0, 1) * 255).(u8);
+    g := (clamp(color.y, 0, 1) * 255).(u8);
+    b := (clamp(color.z, 0, 1) * 255).(u8);
+    bmp_file_bytes := u8.[
+        0x42, 0x4d,              // BMP magic 'BM'
+        0x1D, 0x00, 0x00, 0x00,  // file size (29 bytes)
+        0x00, 0x00, 0x00, 0x00,  // unused/reserved
+        0x1A, 0x00, 0x00, 0x00,  // pixel data offset (26 bytes)
+        0x0C, 0x00, 0x00, 0x00,  // header size (12 bytes)
+        0x01, 0x00,              // image width (1 pixel)
+        0x01, 0x00,              // image height (1 pixel)
+        0x01, 0x00,              // number of image planes (always 1)
+        0x18, 0x00,              // bits per pixel (1, 4, 8, or 24/0x18)
+        b, g, r,                 // BGR pixel data
+    ];
+    texture_load_from_memory(texture, bmp_file_bytes);
+}
+
 //draw_rect :: inline (x: float, y: float, w: float, h: float, color := Vector4.{1,1,1,1}, outline_color := Black, outline_thickness := 0.0) {
 //    draw_rect(x, y, w, h, null, color, outline_color=outline_color, outline_thickness=outline_thickness);
 //}
