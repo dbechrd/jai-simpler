@@ -32,14 +32,6 @@ is_mouse_keycode :: (key_code: Key_Code) -> bool {
         || key_code == .MOUSE_WHEEL_DOWN;
 }
 
-is_mouse_event :: (event: Event) -> bool {
-    return event.type == .MOUSE_WHEEL || (event.type == .KEYBOARD && is_mouse_keycode(event.key_code));
-}
-
-is_keyboard_event :: (event: Event) -> bool {
-    return event.type == .KEYBOARD && !is_mouse_keycode(event.key_code);
-}
-
 process_input :: () {
     window_focused = input_application_has_focus;
     x, y := get_mouse_pointer_position(window, !LEFT_HANDED);
@@ -75,12 +67,19 @@ process_input :: () {
             getrect_handle_event(event);
         }
 
-        if input_captured_mouse && is_mouse_event(event) {
+        if input_captured_mouse && event.type == .MOUSE_WHEEL {
             continue;
         }
-        if input_captured_keyboard && is_keyboard_event(event) && event.key_pressed {
-            // note: don't continue on key release events, to prevent stuck keys
-            continue;
+
+        // note: don't continue on key release events, to prevent stuck keys
+        if event.type == .KEYBOARD && event.key_pressed {
+            is_mouse_button := is_mouse_keycode(event.key_code);
+            if input_captured_mouse && is_mouse_button {
+                continue;
+            }
+            if input_captured_keyboard && !is_mouse_button {
+                continue;
+            }
         }
 
         // Try to handle the event via the keymap
