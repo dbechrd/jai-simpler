@@ -90,6 +90,7 @@ GameMode :: struct {
     init: ();
     deinit: ();
     tick: ();
+    post_tick: ();
     update: ();
     draw: ();
 };
@@ -200,21 +201,28 @@ simpler_update :: () {
     if ticks_per_second && tick_number {
         tick_accum += frame_dt;
         // re-sync tick accumulator when there are big frame time spikes
-        tick_accum = clamp(tick_accum, 0, tick_dt * 10);
+        tick_accum = clamp(tick_accum, 0, tick_dt * 2 - 0.0000001);
     }
 
     // fixed physics tick
+    ticks := 0;
+
     t_tick := seconds_since_init();
     while ticks_per_second && tick_accum >= tick_dt {
         tick_number += 1;
         game_mode.tick();
         tick_now += tick_dt;
         tick_accum -= tick_dt;
+        ticks += 1;
         #if ONE_TICK_PER_FRAME {
             break;
         }
     }
     timings_buf[Timing.Tick] = seconds_since_init() - t_tick;
+
+    if ticks {
+        game_mode.post_tick();
+    }
 
     // per-frame updates
     t_update := seconds_since_init();

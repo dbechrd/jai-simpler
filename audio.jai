@@ -21,11 +21,15 @@ init_audio :: () {
 }
 
 deinit_audio :: () {
-    sound_player_shutdown();
+    //sound_player_shutdown();
 }
 
 set_category_volume :: (category: Sound_Category, volume: float) {
     Sound.mix_levels[category] = clamp(volume, 0.0, 1.0);
+}
+
+update_audio_listener_position :: (position: Vector3) {
+    Sound.update_listener(position, .{});
 }
 
 update_audio :: () {
@@ -40,19 +44,27 @@ sound_duration_seconds :: (sound_data: *Sound_Data) -> float {
 }
 
 // note: perturb flag ignored when looping, because there's no easy way to vary it per loop iteration right now
-play_sound :: (sound_data: *Sound_Data, category := Sound_Category.GENERAL_SFX, volume := 1.0, perturb := 0.0, rate_scale := 1.0, loop := false) {
+make_stream :: (sound_data: *Sound_Data, category := Sound_Category.GENERAL_SFX, volume := 1.0, perturb := 0.0, rate_scale := 1.0, loop := false) -> *Sound_Stream {
     stream := make_stream(sound_data, category);
     if sound_data.type == .OGG_COMPRESSED {
         // HACK: If an .ogg isn't big enough to finish loading "initial pages", we need to disable the wait.
-        stream.internal_flags &= ~.WAITING_FOR_INITIAL_DECODER_PAGES;
+        // stream.internal_flags &= ~.WAITING_FOR_INITIAL_DECODER_PAGES;
     }
 
     stream.user_volume_scale = volume;
     // stream.user_volume_scale = random_get_within_range(0.5,  1);
-    stream.rate_scale = rate_scale * random_get_within_range(1.0 - perturb, 1.0 + perturb);
+    if perturb {
+        stream.rate_scale = rate_scale * random_get_within_range(1.0 - perturb, 1.0 + perturb);
+    }
     if loop then set_repeating(stream, true);
 
+    return stream;
+}
+
+play_sound :: (sound_data: *Sound_Data, category := Sound_Category.GENERAL_SFX, volume := 1.0, perturb := 0.0, rate_scale := 1.0, loop := false) -> *Sound_Stream {
+    stream := make_stream(sound_data, category, volume, perturb, rate_scale, loop);
     start_playing(stream);
+    return stream;
 }
 
 play_sound_random :: (sound_data: [] Sound_Data, category := Sound_Category.GENERAL_SFX, volume := 1.0, perturb := 0.0, rate_scale := 1.0, loop := false) {

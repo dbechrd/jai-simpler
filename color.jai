@@ -1,3 +1,4 @@
+NO_COLOR        :: Vector4.{ 1, 1, 1, 0 };  // "invisible white" for "null" colors
 TRANSPARENT     :: Vector4.{};
 WHITE           :: Vector4.{ 1, 1, 1, 1 };
 LIGHT_GRAY      :: Vector4.{ .75, .75, .75, 1 };
