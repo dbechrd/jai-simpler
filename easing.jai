@@ -1,6 +1,27 @@
 // https://easings.net/
 // https://github.com/ai/easings.net/blob/master/src/easings/easingsFunctions.ts
 
+Ease_Fn :: type_of(ease_in_quad);
+
+Easer :: struct (T: Type) {
+    x0: T;
+    x1: T;
+    func: Ease_Fn;
+    duration: float64;
+    delay: float64;
+}
+
+easer :: (x0: $T, x1: T, func: Ease_Fn = ease_in_out_quint, duration: float64 = 1.0, delay: float64 = 0) -> Easer(T) {
+    result := Easer(T).{ x0, x1, func, duration, delay };
+    return result;
+}
+
+ease :: (easer: Easer, now: float64) -> float {
+    t: float = xx clamp((now - easer.delay) / easer.duration, 0, 1);
+    x := lerp(easer.x0, easer.x1, easer.func(t));
+    return x;
+}
+
 ease_in_quad :: (t: float) -> float {
     return t * t;
 }
@@ -149,7 +170,7 @@ Easing_Debug_State :: struct {
 }
 easing_debug_state: Easing_Debug_State;
 
-easing_funcs :: type_of(ease_in_quad).[
+easing_funcs :: Ease_Fn.[
     ease_in_quad,
     ease_in_cubic,
     ease_in_quart,

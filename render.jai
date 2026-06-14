@@ -19,7 +19,7 @@ texture_by_filepath: Table(string, Bucket_Locator);
 init_render :: (title: string, requested_window_size: Vector2i) {
     #if ASSET_WATCHER {
         assert(!texture_by_filepath.allocated);
-        init(*texture_by_filepath, 64);
+        table_resize(*texture_by_filepath, 64);
     }
 
     window = create_window(requested_window_size.x, requested_window_size.y, title);

@@ -93,6 +93,7 @@ GameMode :: struct {
     post_tick: ();
     update: ();
     draw: ();
+    end_frame: ();
 };
 
 game_mode: *GameMode;
@@ -161,7 +162,7 @@ init_keymap :: (filename: string) {
     }
 }
 
-begin_frame :: () {
+simpler_begin_frame :: () {
     future := seconds_since_init();
     frame_dt = future - now;
     now = future;  // the future is now
@@ -239,7 +240,9 @@ simpler_draw :: () {
     // }
 }
 
-end_frame :: () {
+simpler_end_frame :: () {
+    game_mode.end_frame();
+
     t_audio := seconds_since_init();
     update_audio();
     timings_buf[Timing.Audio] = seconds_since_init() - t_audio;
@@ -282,10 +285,10 @@ end_frame :: () {
 
 simpler_game_loop :: () {
     while !quit {
-        begin_frame();
+        simpler_begin_frame();
         simpler_update();
         simpler_draw();
-        end_frame();
+        simpler_end_frame();
     }
 }
 

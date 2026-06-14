@@ -1,30 +1,33 @@
+#import "PCG";
+using,only(Sound_Category, Sound_Data, Sound_Stream) Sound :: #import "Sound_Player";
+
 default_sound: Sound_Data;
 
 init_audio :: () {
     log("--- Audio Info ---\n");
 
-    devices := get_devices();
+    devices := Sound.get_devices();
     log("devices: %\n", devices);
 
-    success := sound_player_init(.{ audible_when_window_is_not_in_focus = BACKGROUND_AUDIO });
+    success := Sound.sound_player_init(.{ audible_when_window_is_not_in_focus = BACKGROUND_AUDIO });
     assert(success);
     if !success {
         log_error("failed to initialize sound player\n");
         return;
     }
 
-    log("sample_rate: %\n", get_audio_sampling_rate());
+    log("sample_rate: %\n", Sound.get_audio_sampling_rate());
     log("volume: %\n", Sound.master_volume);
     // log("mix_levels: %\n", Sound.mix_levels);
 
-    default_sound = load_audio_data("default_sound", MISSING_OGG_BYTES);
+    default_sound = Sound.load_audio_data("default_sound", MISSING_OGG_BYTES);
 }
 
 deinit_audio :: () {
     //sound_player_shutdown();
 }
 
-set_category_volume :: (category: Sound_Category, volume: float) {
+set_mix_level :: (category: Sound_Category, volume: float) {
     Sound.mix_levels[category] = clamp(volume, 0.0, 1.0);
 }
 
@@ -44,8 +47,8 @@ sound_duration_seconds :: (sound_data: *Sound_Data) -> float {
 }
 
 // note: perturb flag ignored when looping, because there's no easy way to vary it per loop iteration right now
-make_stream :: (sound_data: *Sound_Data, category := Sound_Category.GENERAL_SFX, volume := 1.0, perturb := 0.0, rate_scale := 1.0, loop := false) -> *Sound_Stream {
-    stream := make_stream(sound_data, category);
+make_sound_stream :: (sound_data: *Sound_Data, category := Sound_Category.GENERAL_SFX, volume := 1.0, perturb := 0.0, rate_scale := 1.0, loop := false) -> *Sound_Stream {
+    stream := Sound.make_stream(sound_data, category);
     if sound_data.type == .OGG_COMPRESSED {
         // HACK: If an .ogg isn't big enough to finish loading "initial pages", we need to disable the wait.
         // stream.internal_flags &= ~.WAITING_FOR_INITIAL_DECODER_PAGES;
@@ -56,14 +59,14 @@ make_stream :: (sound_data: *Sound_Data, category := Sound_Category.GENERAL_SFX,
     if perturb {
         stream.rate_scale = rate_scale * random_get_within_range(1.0 - perturb, 1.0 + perturb);
     }
-    if loop then set_repeating(stream, true);
+    if loop then Sound.set_repeating(stream, true);
 
     return stream;
 }
 
 play_sound :: (sound_data: *Sound_Data, category := Sound_Category.GENERAL_SFX, volume := 1.0, perturb := 0.0, rate_scale := 1.0, loop := false) -> *Sound_Stream {
-    stream := make_stream(sound_data, category, volume, perturb, rate_scale, loop);
-    start_playing(stream);
+    stream := make_sound_stream(sound_data, category, volume, perturb, rate_scale, loop);
+    Sound.start_playing(stream);
     return stream;
 }
 
@@ -117,6 +120,3 @@ generate_sine_wave :: (using sound_data: *Sound_Data, sound_name: string, freque
 #scope_file
 
 #load "missing_ogg.jai";
-
-#import "PCG";
-using Sound :: #import "Sound_Player";
