@@ -67,8 +67,9 @@ set_tps :: (tps: int) {
 }
 
 Timing :: enum {
-    Tick;
     Update;
+    Tick;
+    Late_Update;
     Draw;
     Audio;
     #if ASSET_WATCHER {
@@ -89,9 +90,9 @@ GameMode :: struct {
     name: string;
     init: ();
     deinit: ();
-    tick: ();
-    post_tick: ();
     update: ();
+    tick: ();
+    late_update: ();
     draw: ();
     end_frame: ();
 };
@@ -199,13 +200,19 @@ simpler_update :: () {
         }
     }
 
+
+    // per-frame update
+    t_update := seconds_since_init();
+    game_mode.update();
+    timings_buf[Timing.Update] = seconds_since_init() - t_update;
+
     if ticks_per_second && tick_number {
         tick_accum += frame_dt;
         // re-sync tick accumulator when there are big frame time spikes
         tick_accum = clamp(tick_accum, 0, tick_dt * 2 - 0.0000001);
     }
 
-    // fixed physics tick
+    // fixed update ticks
     ticks := 0;
 
     t_tick := seconds_since_init();
@@ -221,14 +228,9 @@ simpler_update :: () {
     }
     timings_buf[Timing.Tick] = seconds_since_init() - t_tick;
 
-    if ticks {
-        game_mode.post_tick();
-    }
-
-    // per-frame updates
-    t_update := seconds_since_init();
-    game_mode.update();
-    timings_buf[Timing.Update] = seconds_since_init() - t_update;
+    t_late_update := seconds_since_init();
+    game_mode.late_update();
+    timings_buf[Timing.Late_Update] = seconds_since_init() - t_late_update;
 }
 
 simpler_draw :: () {

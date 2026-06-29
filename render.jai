@@ -115,11 +115,24 @@ generate_one_pixel_texture :: (texture: *Texture, color: Vector3) {
     texture_load_from_memory(texture, bmp_file_bytes);
 }
 
+// note: the caller is responsible for checking bpp of bitmap and reading/writing the correct # of bytes for the pixel
+bitmap_pixel_at :: (bmp: *Bitmap, coord: Vector2i, $no_bounds_check := false) -> in_bounds: bool, pixel_data: *u8 = null {
+    #if !no_bounds_check {
+        if coord.x < 0 || coord.x >= bmp.width || coord.y < 0 || coord.y >= bmp.height {
+            return false;
+        }
+    }
+    bpp := bmp.stride / bmp.width;
+    pixel_data := *bmp.data[coord.y * bmp.stride + coord.x * bpp];
+    return true, pixel_data;
+}
+
 //draw_rect :: inline (x: float, y: float, w: float, h: float, color := Vector4.{1,1,1,1}, outline_color := Black, outline_thickness := 0.0) {
 //    draw_rect(x, y, w, h, null, color, outline_color=outline_color, outline_thickness=outline_thickness);
 //}
 
-draw_rect :: (x: float, y: float, w: float, h: float, color := Vector4.{1,1,1,1}, texture: *Texture = null, uv_tl := Vector2.{}, uv_br := Vector2.{1, 1}, outline_color := Black, outline_thickness := 0.0, $set_shader := true) {
+// theta_deg is angle to rorate, in degrees, clockwise from up
+draw_rect :: (x: float, y: float, w: float, h: float, color := Vector4.{1,1,1,1}, texture: *Texture = null, uv_tl := Vector2.{}, uv_br := Vector2.{1, 1}, outline_color := Black, outline_thickness := 0.0, theta_deg := 0.0, rotation_axis := Vector3.{0, 0, 1}, $set_shader := true) {
     #if set_shader {
         if texture {
             set_shader_for_images(texture);
@@ -128,14 +141,24 @@ draw_rect :: (x: float, y: float, w: float, h: float, color := Vector4.{1,1,1,1}
         }
     }
 
-    p0 := Vector2.{ x  , y   };
-    p1 := Vector2.{ x  , y+h };
-    p2 := Vector2.{ x+w, y+h };
-    p3 := Vector2.{ x+w, y   };
+    p0 := Vector3.{ x  , y  , 1 };
+    p1 := Vector3.{ x  , y+h, 1 };
+    p2 := Vector3.{ x+w, y+h, 1 };
+    p3 := Vector3.{ x+w, y  , 1 };
     uv0 := uv_tl;
     uv1 := Vector2.{ uv_tl.x, uv_br.y };
     uv2 := uv_br;
     uv3 := Vector2.{ uv_br.x, uv_tl.y };
+
+    if theta_deg {
+        quat: Quaternion;
+        set_from_axis_and_angle(*quat, rotation_axis, theta_deg * PI / 180);
+        center_offset := Vector3.{ x + w / 2, y + h / 2, 0 };
+        p0 = rotate(p0 - center_offset, quat) + center_offset;
+        p1 = rotate(p1 - center_offset, quat) + center_offset;
+        p2 = rotate(p2 - center_offset, quat) + center_offset;
+        p3 = rotate(p3 - center_offset, quat) + center_offset;
+    }
 
     immediate_quad(p0, p1, p2, p3, color, uv0, uv1, uv2, uv3);
     if outline_thickness {
