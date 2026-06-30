@@ -166,6 +166,10 @@ draw_rect :: (x: float, y: float, w: float, h: float, color := Vector4.{1,1,1,1}
     }
 }
 
+draw_rect :: (rect: Rect, color := Vector4.{1,1,1,1}, texture: *Texture = null, uv_tl := Vector2.{}, uv_br := Vector2.{1, 1}, outline_color := Black, outline_thickness := 0.0, theta_deg := 0.0, rotation_axis := Vector3.{0, 0, 1}, $set_shader := true) {
+    draw_rect(rect.position.x, rect.position.y, rect.size.x, rect.size.y, color, texture, uv_tl, uv_br, outline_color, outline_thickness, theta_deg, rotation_axis, set_shader);
+}
+
 //draw_rect_clamped_to_window :: inline (x: float, y: float, w: float, h: float, color := Vector4.{1,1,1,1}, outline_color := Black, //outline_thickness := 0.0) -> clamp_offset: Vector2 {
 //    return draw_rect_clamped_to_window(x, y, w, h, null, color, outline_color, outline_thickness);
 //}
@@ -210,6 +214,10 @@ draw_rect_outline :: (x: float, y: float, w: float, h: float, color := Vector4.{
     immediate_line(p2-.{thickness/2, 0}, p3+.{thickness/2, 0}, color, thickness);  // bottom
     immediate_line(p1, p3, color, thickness);  // right
     immediate_line(p2, p0, color, thickness);  // left
+}
+
+draw_rect_outline :: (rect: Rect, color := Vector4.{1,1,1,1}, thickness: float = 1.0, $set_shader := true) {
+    draw_rect_outline(rect.position.x, rect.position.y, rect.size.x, rect.size.y, color, thickness, set_shader);
 }
 
 // todo: 1x3 and 3x1 mode, e.g. by having left_border/right_border 0 for vertical, use $constants to remove extra draw calls at compile time
