@@ -1,15 +1,15 @@
-Rect :: struct {
+Rect2D :: struct {
     position: Vector2;
     size: Vector2;
 }
 
-operator+ :: (rect: Rect, offset: Vector2) -> Rect {
+operator+ :: (rect: Rect2D, offset: Vector2) -> Rect2D {
     result := rect;
     result.position += offset;
     return result;
 }
 
-operator- :: (rect: Rect, offset: Vector2) -> Rect {
+operator- :: (rect: Rect2D, offset: Vector2) -> Rect2D {
     result := rect;
     result.position -= offset;
     return result;
@@ -19,7 +19,7 @@ point_overlaps_rect :: (p: Vector2, x: float, y: float, w: float, h: float) -> b
     return p.x >= x && p.x < x + w && p.y >= y && p.y < y + h;
 }
 
-point_overlaps_rect :: (p: Vector2, rect: Rect) -> bool {
+point_overlaps_rect :: (p: Vector2, rect: Rect2D) -> bool {
     return point_overlaps_rect(p, rect.position.x, rect.position.y, rect.size.x, rect.size.y);
 }
 
@@ -34,7 +34,7 @@ mouse_overlaps_rect :: (x: float, y: float, w: float, h: float) -> bool {
     return point_overlaps_rect(p, x, y, w, h);
 }
 
-mouse_overlaps_rect :: (rect: Rect) -> bool {
+mouse_overlaps_rect :: (rect: Rect2D) -> bool {
     return point_overlaps_rect(mouse_position, rect.position.x, rect.position.y, rect.size.x, rect.size.y);
 }
 
@@ -43,9 +43,22 @@ rect_overlaps_rect :: (ax: float, ay: float, aw: float, ah: float,
     return ax + aw > bx && ay + ah > by && bx + bw > ax && by + bh > ay;
 }
 
-rect_overlaps_rect :: (a: Rect, b: Rect) -> bool {
+rect_overlaps_rect :: (a: Rect2D, b: Rect2D) -> bool {
     return a.position.x + a.size.w > b.position.x && ay + a.size.h > b.position.y &&
            b.position.x + b.size.w > a.position.x && by + b.size.h > a.position.y;
+}
+
+rect_clamp_to_window :: (rect: Rect2D) -> Rect2D {
+    result := rect;
+    if result.position.x < 0 then result.position.x = 0;
+    if result.position.y < 0 then result.position.y = 0;
+    if result.position.x + result.size.x > xx window_size.x {
+        result.position.x -= ((result.position.x + result.size.x) - window_size.x);
+    }
+    if result.position.y + result.size.y > xx window_size.y {
+        result.position.y -= ((result.position.y + result.size.y) - window_size.y);
+    }
+    return result;
 }
 
 #if GET_RECT {

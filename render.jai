@@ -166,7 +166,7 @@ draw_rect :: (x: float, y: float, w: float, h: float, color := Vector4.{1,1,1,1}
     }
 }
 
-draw_rect :: (rect: Rect, color := Vector4.{1,1,1,1}, texture: *Texture = null, uv_tl := Vector2.{}, uv_br := Vector2.{1, 1}, outline_color := Black, outline_thickness := 0.0, theta_deg := 0.0, rotation_axis := Vector3.{0, 0, 1}, $set_shader := true) {
+draw_rect :: (rect: Rect2D, color := Vector4.{1,1,1,1}, texture: *Texture = null, uv_tl := Vector2.{}, uv_br := Vector2.{1, 1}, outline_color := Black, outline_thickness := 0.0, theta_deg := 0.0, rotation_axis := Vector3.{0, 0, 1}, $set_shader := true) {
     draw_rect(rect.position.x, rect.position.y, rect.size.x, rect.size.y, color, texture, uv_tl, uv_br, outline_color, outline_thickness, theta_deg, rotation_axis, set_shader);
 }
 
@@ -201,6 +201,15 @@ draw_rect_clamped_to_window :: (x: float, y: float, w: float, h: float, color :=
     return clamp_offset;
 }
 
+immediate_line :: (p0: Vector2, p1: Vector2, color: Vector4, thickness := 1.0) {
+    normal := normalize(Vector2.{ p1.y - p0.y, -(p1.x - p0.x) });
+    v0 := .{ p0.x, p0.y } - normal * thickness / 2;
+    v1 := .{ p0.x, p0.y } + normal * thickness / 2;
+    v2 := .{ p1.x, p1.y } + normal * thickness / 2;
+    v3 := .{ p1.x, p1.y } - normal * thickness / 2;
+    immediate_quad(v0, v1, v2, v3, color);
+}
+
 draw_rect_outline :: (x: float, y: float, w: float, h: float, color := Vector4.{1,1,1,1}, thickness: float = 1.0, $set_shader := true) {
     #if set_shader {
         set_shader_for_color(true);
@@ -216,7 +225,7 @@ draw_rect_outline :: (x: float, y: float, w: float, h: float, color := Vector4.{
     immediate_line(p2, p0, color, thickness);  // left
 }
 
-draw_rect_outline :: (rect: Rect, color := Vector4.{1,1,1,1}, thickness: float = 1.0, $set_shader := true) {
+draw_rect_outline :: (rect: Rect2D, color := Vector4.{1,1,1,1}, thickness: float = 1.0, $set_shader := true) {
     draw_rect_outline(rect.position.x, rect.position.y, rect.size.x, rect.size.y, color, thickness, set_shader);
 }
 
