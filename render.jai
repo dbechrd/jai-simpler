@@ -28,6 +28,11 @@ init_render :: (title: string, requested_window_size: Vector2i) {
     #if OS == .WINDOWS {
         #import "GL";
         vsync = xx wglGetSwapIntervalEXT();
+
+        //SetForegroundWindow :: (hWnd: HWND) -> BOOL #foreign user32;
+        #import "Windows";
+        // SetWindowPos(window, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+        SetForegroundWindow(window);
     }
 
     window_size.x, window_size.y = get_render_dimensions(window);
