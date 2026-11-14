@@ -1,5 +1,7 @@
 log_file_path := "log.txt";
 
+#add_context log_source: string;
+
 simpler_build_log_message :: (message: string, data: *void, info: Log_Info) -> string {
     builder: String_Builder;
 
@@ -12,26 +14,32 @@ simpler_build_log_message :: (message: string, data: *void, info: Log_Info) -> s
         if info.location.line_number {
             before := builder_string_length(*builder);
 
-            // try to extract the module name, rather than just printing fully qualified file paths (YMMV)
-            #if INFER_LOG_SOURCES {
-                log_source := info.location.fully_pathed_filename;
-                module_split := split(log_source, "modules/",, temp);
-                if module_split.count > 1 {
-                    log_source = split(module_split[module_split.count-1], "/",, temp)[0];
-                    print_to_builder(*builder, "[ %", log_source);
-                } else {
-                    print_to_builder(*builder, "[ ");
-                }
-                PAD_RIGHT :: 16;
+            pad_right: int;
+            append(*builder, "[ ");
+
+            if context.log_source {
+                print_to_builder(*builder, "%", context.log_source);
+                pad_right = 16;
             } else {
-                print_to_builder(*builder, "[%:%", info.location.fully_pathed_filename, info.location.line_number);
-                PAD_RIGHT :: 80;
+                #if INFER_LOG_SOURCES {
+                    // try to extract the module name, rather than just printing fully qualified file paths (YMMV)
+                    log_source := info.location.fully_pathed_filename;
+                    module_split := split(log_source, "modules/",, temp);
+                    if module_split.count > 1 {
+                        log_source = split(module_split[module_split.count-1], "/",, temp)[0];
+                        print_to_builder(*builder, "%", log_source);
+                    }
+                    pad_right = 16;
+                } else {
+                    print_to_builder(*builder, "%:%", info.location.fully_pathed_filename, info.location.line_number);
+                    pad_right = 80;
+                }
             }
 
-            if PAD_RIGHT {
+            if pad_right {
                 bytes := builder_string_length(*builder) - before;
-                if bytes < PAD_RIGHT {
-                    for 0..PAD_RIGHT-bytes-1 {
+                if bytes < pad_right {
+                    for 0..pad_right-bytes-1 {
                         append(*builder, " ");
                     }
                 }
@@ -125,4 +133,5 @@ log_cpu_info :: () {
     log("AVX2   : %\n", ifx check_feature(cpu_info.feature_leaves, x86_Feature_Flag.AVX2) then "Supported" else "Not Supported");
 }
 
+#import "String";
 #import "Machine_X64";
